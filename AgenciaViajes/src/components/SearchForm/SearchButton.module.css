@@ -1,0 +1,30 @@
+.searchBtn {
+  background-color: #111827;
+  color: #ffffff;
+  padding: 0.85rem 2rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+  width: 100%;
+}
+
+.searchBtn:hover {
+  background-color: #1f2937;
+}
+
+@media (min-width: 1024px) {
+  .searchBtn {
+    width: auto;
+    margin-bottom: 2px;
+  }
+}
+
+.inputIcon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}

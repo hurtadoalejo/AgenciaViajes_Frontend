@@ -1,0 +1,1 @@
+export type TransportMode = 'avion' | 'tren' | 'bus';

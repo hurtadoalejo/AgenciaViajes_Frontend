@@ -1,0 +1,52 @@
+.container {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.875rem;
+  border: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+  color: #000000;
+  cursor: pointer;
+  transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.btn:not(.activeAvion):not(.activeTren):not(.activeBus):hover {
+  background-color: #e5e7eb;
+  border-color: #d1d5db;
+}
+
+.activeAvion {
+  background-color: #0284c7;
+  color: #ffffff;
+  border-color: #0284c7;
+  box-shadow: 0 4px 6px rgba(2, 132, 199, 0.2);
+}
+
+.activeTren {
+  background-color: #cd9d1c;
+  color: #ffffff;
+  font-weight: bold;
+  border-color: #cd9d1c;
+  box-shadow: 0 4px 6px rgba(205, 157, 28, 0.2);
+}
+
+.activeBus {
+  background-color: #dc2626;
+  color: #ffffff;
+  border-color: #dc2626;
+  box-shadow: 0 4px 6px rgba(220, 38, 38, 0.2);
+}
+
+.inputIcon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}

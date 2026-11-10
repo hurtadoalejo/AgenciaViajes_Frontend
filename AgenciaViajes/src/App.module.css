@@ -24,8 +24,8 @@
 }
 
 .contentWrapper {
-  max-width: 100%;
-  margin: 2rem 0 0 0;
+  max-width: 80%;
+  margin: 2rem auto 0 auto;
   padding: 0 2rem;
 }
 

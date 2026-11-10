@@ -20,11 +20,10 @@ export default function App() {
   return (
     <div className={`${styles.mainContainer} ${backgroundClasses[mode]}`}>
       <div className={styles.overlay}>
-        <Navbar currentMode={mode}/>
-        
+        <Navbar currentMode={mode} />
         <main className={styles.contentWrapper}>
           <div className={styles.searchBox}>
-            
+
             <div>
               <label className={styles.selectorLabel}>
                 ¿En dónde quieres viajar hoy?

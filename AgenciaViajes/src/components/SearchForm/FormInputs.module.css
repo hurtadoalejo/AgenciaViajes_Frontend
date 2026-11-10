@@ -38,20 +38,97 @@
   border: 1px solid #d1d5db;
   border-radius: 12px;
   background-color: #ffffff;
+  cursor: pointer;
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.inputWrapper input, .inputWrapper select {
+.inputWrapper input,
+.inputWrapper select {
   border: none;
   outline: none;
   width: 100%;
+  min-width: 0;
   font-size: 0.95rem;
   color: #1f2937;
   font-weight: 500;
   background: transparent;
+  cursor: pointer;
 }
 
+.inputWrapper input[type="text"] {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Iconos */
 .inputIcon {
   width: 18px;
   height: 18px;
   object-fit: contain;
+  flex-shrink: 0;
+}
+
+/* Campos de fecha personalizados */
+.dateInput {
+  border: none;
+  outline: none;
+  width: 100%;
+  min-width: 0;
+  font-size: 0.95rem;
+  color: #1f2937;
+  font-weight: 500;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* Contenedor del calendario */
+:global(.react-datepicker-popper) {
+  z-index: 1000;
+}
+
+/* Posición del calendario debajo del input */
+:global(.react-datepicker-popper[data-placement^="bottom"]) {
+  margin-top: 8px;
+}
+
+/* Centrado horizontal del calendario */
+:global(.react-datepicker-popper) {
+  transform-origin: top center;
+}
+
+/* Diseño del calendario */
+:global(.react-datepicker) {
+  font-family: inherit;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.10);
+  overflow: hidden;
+}
+
+:global(.react-datepicker__header) {
+  background-color: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+:global(.react-datepicker__current-month) {
+  color: #1f2937;
+  font-weight: 600;
+}
+
+:global(.react-datepicker__day--selected),
+:global(.react-datepicker__day--keyboard-selected) {
+  background-color: #2563eb;
+  color: #ffffff;
+  border-radius: 6px;
+}
+
+:global(.react-datepicker__day:hover) {
+  background-color: #dbeafe;
+  border-radius: 6px;
+}
+
+:global(.react-datepicker__day--disabled) {
+  color: #d1d5db;
 }

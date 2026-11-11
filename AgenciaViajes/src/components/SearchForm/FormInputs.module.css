@@ -132,3 +132,8 @@
 :global(.react-datepicker__day--disabled) {
   color: #d1d5db;
 }
+
+.hiddenKeepSpace {
+  visibility: hidden;
+  pointer-events: none;
+}

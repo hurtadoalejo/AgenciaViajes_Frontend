@@ -16,7 +16,7 @@ export default function Navbar({ currentMode }: NavbarProps) {
   return (
     <nav className={styles.navbar}>
       <h1 className={`${styles.title} ${titleStyles[currentMode]}`}>
-        Agencia bla bla
+        Viaja Por America
       </h1>
 
       <button className={styles.loginBtn}>

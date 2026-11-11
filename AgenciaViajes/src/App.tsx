@@ -36,7 +36,7 @@ export default function App() {
             <div className={styles.formRow}>
               <div style={{ flexGrow: 1, width: '100%' }}>
                 <TripType currentType={tripType} onTypeChange={setTripType} />
-                <FormInputs />
+                <FormInputs tripType={tripType} />
               </div>
               <SearchButton />
             </div>

@@ -62,15 +62,27 @@
   -webkit-user-select: none;
 }
 
-/* Iconos */
+.inputWrapper select {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 10;
+  padding: 0;
+  margin: 0;
+}
+
 .inputIcon {
   width: 18px;
   height: 18px;
   object-fit: contain;
   flex-shrink: 0;
+  pointer-events: none;
 }
 
-/* Campos de fecha personalizados */
 .dateInput {
   border: none;
   outline: none;
@@ -83,22 +95,18 @@
   cursor: pointer;
 }
 
-/* Contenedor del calendario */
 :global(.react-datepicker-popper) {
   z-index: 1000;
 }
 
-/* Posición del calendario debajo del input */
 :global(.react-datepicker-popper[data-placement^="bottom"]) {
   margin-top: 8px;
 }
 
-/* Centrado horizontal del calendario */
 :global(.react-datepicker-popper) {
   transform-origin: top center;
 }
 
-/* Diseño del calendario */
 :global(.react-datepicker) {
   font-family: inherit;
   border: 1px solid #d1d5db;

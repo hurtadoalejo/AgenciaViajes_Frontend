@@ -20,6 +20,7 @@ export default function FormInputs({ tripType }: FormInputsProps) {
 
   const [origin, setOrigin] = useState<string>('');
   const [destination, setDestination] = useState<string>('');
+  const [passengers, setPassengers] = useState<string>('1');
   
   const [departureDate, setDepartureDate] = useState<Date | null>(null);
   const [returnDate, setReturnDate] = useState<Date | null>(null);
@@ -29,6 +30,11 @@ export default function FormInputs({ tripType }: FormInputsProps) {
   const availableDestinations = EUROPEAN_CITIES.filter(city => city.code !== origin);
   const availableOrigins = EUROPEAN_CITIES.filter(city => city.code !== destination);
 
+  const getCityLabel = (code: string) => {
+    const city = EUROPEAN_CITIES.find(c => c.code === code);
+    return city ? `${city.name} (${city.code}) - ${city.country}` : 'Selecciona ciudad';
+  };
+
   return (
     <div className={styles.gridContainer}>
 
@@ -36,14 +42,15 @@ export default function FormInputs({ tripType }: FormInputsProps) {
         <span className={styles.label}>Origen</span>
         <div className={styles.inputWrapper}>
           <img src={iconOrigen} className={styles.inputIcon} alt="" />
+          <span className={styles.selectedText}>
+            {origin ? getCityLabel(origin) : 'Selecciona ciudad origen'}
+          </span>
           <select 
             value={origin} 
             onChange={(e) => setOrigin(e.target.value)}
-            className={styles.selectInput}
+            className={styles.selectOverlay}
           >
-            <option value="" disabled>
-              Selecciona ciudad origen
-            </option>
+            <option value="" disabled>Selecciona ciudad origen</option>
             {availableOrigins.map((city) => (
               <option key={`origin-${city.code}`} value={city.code}>
                 {city.name} ({city.code}) - {city.country}
@@ -57,15 +64,16 @@ export default function FormInputs({ tripType }: FormInputsProps) {
         <span className={styles.label}>Destino</span>
         <div className={styles.inputWrapper}>
           <img src={iconDestino} className={styles.inputIcon} alt="" />
+          <span className={styles.selectedText}>
+            {destination ? getCityLabel(destination) : 'Selecciona ciudad destino'}
+          </span>
           <select 
             value={destination} 
             onChange={(e) => setDestination(e.target.value)}
             disabled={isSoloIda}
-            className={styles.selectInput}
+            className={styles.selectOverlay}
           >
-            <option value="" disabled>
-              Selecciona ciudad destino
-            </option>
+            <option value="" disabled>Selecciona ciudad destino</option>
             {availableDestinations.map((city) => (
               <option key={`dest-${city.code}`} value={city.code}>
                 {city.name} ({city.code}) - {city.country}
@@ -91,7 +99,7 @@ export default function FormInputs({ tripType }: FormInputsProps) {
             dateFormat="dd/MM/yyyy"
             placeholderText="Seleccionar fecha"
             popperPlacement="bottom"
-            className={styles.dateInput}
+            className={styles.dateInputWrapper}
             calendarStartDay={1}
           />
         </div>
@@ -108,7 +116,7 @@ export default function FormInputs({ tripType }: FormInputsProps) {
             dateFormat="dd/MM/yyyy"
             placeholderText="Seleccionar fecha"
             popperPlacement="bottom"
-            className={styles.dateInput}
+            className={styles.dateInputWrapper}
             calendarStartDay={1}
             disabled={isSoloIda}
           />
@@ -119,7 +127,14 @@ export default function FormInputs({ tripType }: FormInputsProps) {
         <span className={styles.label}>Pasajeros</span>
         <div className={styles.inputWrapper}>
           <img src={iconChangePasengers} className={styles.inputIcon} alt="" />
-          <select defaultValue="1" className={styles.selectInput}>
+          <span className={styles.selectedText}>
+            {passengers} {Number(passengers) === 1 ? 'Pasajero' : 'Pasajeros'}
+          </span>
+          <select 
+            value={passengers} 
+            onChange={(e) => setPassengers(e.target.value)}
+            className={styles.selectOverlay}
+          >
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>

@@ -1,49 +1,17 @@
-import { useState } from 'react';
-import styles from './App.module.css';
-import Navbar from './components/Layout/Navbar';
-import ModeSelector from './components/SearchForm/ModeSelector';
-import TripType from './components/SearchForm/TripType';
-import FormInputs from './components/SearchForm/FormInputs';
-import SearchButton from './components/SearchForm/SearchButton';
-import type { TransportMode } from './types';
-
-const backgroundClasses: Record<TransportMode, string> = {
-  avion: styles.bgAvion,
-  tren: styles.bgTren,
-  bus: styles.bgBus,
-};
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import Home from './pages/Home';
+import Login from './pages/Login';
+import Register from './pages/Register';
 
 export default function App() {
-  const [mode, setMode] = useState<TransportMode>('avion');
-  const [tripType, setTripType] = useState<'ida-vuelta' | 'solo-ida'>('ida-vuelta');
-
   return (
-    <div className={`${styles.mainContainer} ${backgroundClasses[mode]}`}>
-      <div className={styles.overlay}>
-        <Navbar currentMode={mode} />
-        <main className={styles.contentWrapper}>
-          <div className={styles.searchBox}>
-
-            <div>
-              <label className={styles.selectorLabel}>
-                ¿En dónde quieres viajar hoy?
-              </label>
-              <ModeSelector currentMode={mode} onModeChange={setMode} />
-            </div>
-
-            <hr className={styles.divider} />
-
-            <div className={styles.formRow}>
-              <div style={{ flexGrow: 1, width: '100%' }}>
-                <TripType currentType={tripType} onTypeChange={setTripType} />
-                <FormInputs tripType={tripType} />
-              </div>
-              <SearchButton />
-            </div>
-
-          </div>
-        </main>
-      </div>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/registro" element={<Register />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }

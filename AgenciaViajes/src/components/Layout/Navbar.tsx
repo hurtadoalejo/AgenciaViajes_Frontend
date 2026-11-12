@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import styles from './Navbar.module.css';
 import iconLogin from '../../assets/iconLogin.png';
 import type { TransportMode } from '../../types';
@@ -19,10 +20,10 @@ export default function Navbar({ currentMode }: NavbarProps) {
         Viaja por Europa
       </h1>
 
-      <button className={styles.loginBtn}>
-        <img src={iconLogin} className={styles.btnIcon} />
+      <Link to="/login" className={styles.loginBtn}>
+        <img src={iconLogin} alt="Icono iniciar sesión" className={styles.btnIcon} />
         Iniciar sesión
-      </button>
+      </Link>
     </nav>
   );
 }

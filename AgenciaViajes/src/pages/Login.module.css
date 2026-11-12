@@ -1,0 +1,224 @@
+.pageContainer {
+  min-height: 100vh;
+  background-color: #f3f5f9;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Barra superior izquierda */
+.topBar {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 1rem;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: #1e293b;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.backLink:hover {
+  background-color: #e2e8f0;
+}
+
+.backIcon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+/* Contenedor principal centrado */
+.contentWrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.formCard {
+  background-color: #ffffff;
+  width: 100%;
+  max-width: 440px;
+  padding: 2.25rem;
+  border-radius: 14px;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+}
+
+.title {
+  margin: 0 0 0.35rem 0;
+  font-size: 1.75rem;
+  color: #0f172a;
+}
+
+.subtitle {
+  margin: 0 0 1.75rem 0;
+  font-size: 0.95rem;
+  color: #64748b;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.inputGroup label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.inputGroup input {
+  padding: 0.7rem 0.85rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #0f172a;
+  background-color: #ffffff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.inputGroup input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* Botón de envío */
+.submitButton {
+  margin-top: 0.5rem;
+  padding: 0.85rem;
+  background-color: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.submitButton:hover:not(:disabled) {
+  background-color: #1d4ed8;
+}
+
+.submitButton:disabled {
+  background-color: #93c5fd;
+  cursor: not-allowed;
+}
+
+/* Texto debajo del recuadro */
+.registerPrompt {
+  margin-top: 1.25rem;
+  font-size: 0.95rem;
+  color: #475569;
+  text-align: center;
+}
+
+.registerLink {
+  color: #2563eb;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.registerLink:hover {
+  text-decoration: underline;
+}
+
+/* Pop-up / Modal */
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 1000;
+}
+
+.modalBox {
+  background-color: #ffffff;
+  width: 100%;
+  max-width: 400px;
+  padding: 2rem;
+  border-radius: 14px;
+  text-align: center;
+  box-shadow: 0 20px 30px rgba(0, 0, 0, 0.2);
+}
+
+.modalIcon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  margin: 0 auto 1rem auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  font-weight: bold;
+}
+
+.iconSuccess {
+  background-color: #dcfce7;
+  color: #16a34a;
+}
+
+.iconError {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.modalTitle {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.35rem;
+  color: #0f172a;
+}
+
+.modalMessage {
+  margin: 0 0 1.5rem 0;
+  font-size: 0.95rem;
+  color: #475569;
+  line-height: 1.45;
+}
+
+.modalButton {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #0f172a;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.modalButton:hover {
+  background-color: #334155;
+}
+
+@media (max-width: 640px) {
+  .formCard {
+    padding: 1.5rem;
+  }
+}

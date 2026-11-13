@@ -12,6 +12,7 @@ interface RegisterFormData {
   segundoNombre: string;
   primerApellido: string;
   segundoApellido: string;
+  fechaNacimiento: string;
   pais: string;
   departamento: string;
   ciudad: string;
@@ -29,6 +30,105 @@ interface ModalState {
   message: string;
 }
 
+const UBICACIONES: Record<string, Record<string, string[]>> = {
+  Colombia: {
+    Antioquia: ['Medellín', 'Envigado'],
+    Atlántico: ['Barranquilla', 'Soledad'],
+    'Bogotá D.C.': ['Bogotá', 'Usaquén'],
+    Bolívar: ['Cartagena', 'Magangué'],
+    Boyacá: ['Tunja', 'Duitama'],
+    Caldas: ['Manizales', 'Villamaría'],
+    Cundinamarca: ['Soacha', 'Chía'],
+    Quindío: ['Armenia', 'Calarcá'],
+    Risaralda: ['Pereira', 'Dosquebradas'],
+    'Valle del Cauca': ['Cali', 'Palmira'],
+  },
+  'Estados Unidos': {
+    California: ['Los Ángeles', 'San Francisco'],
+    Texas: ['Houston', 'Austin'],
+    Florida: ['Miami', 'Orlando'],
+    'Nueva York': ['Nueva York', 'Búfalo'],
+    Illinois: ['Chicago', 'Aurora'],
+    Pensilvania: ['Filadelfia', 'Pittsburgh'],
+    Ohio: ['Columbus', 'Cleveland'],
+    Georgia: ['Atlanta', 'Savannah'],
+    'Carolina del Norte': ['Charlotte', 'Raleigh'],
+    Míchigan: ['Detroit', 'Grand Rapids'],
+  },
+  España: {
+    Andalucía: ['Sevilla', 'Málaga'],
+    Cataluña: ['Barcelona', 'Girona'],
+    'Comunidad de Madrid': ['Madrid', 'Alcalá de Henares'],
+    'Comunidad Valenciana': ['Valencia', 'Alicante'],
+    Galicia: ['Vigo', 'A Coruña'],
+    'Castilla y León': ['Valladolid', 'Salamanca'],
+    'País Vasco': ['Bilbao', 'San Sebastián'],
+    Canarias: ['Las Palmas', 'Santa Cruz de Tenerife'],
+    'Castilla-La Mancha': ['Toledo', 'Albacete'],
+    Aragón: ['Zaragoza', 'Huesca'],
+  },
+  México: {
+    'Ciudad de México': ['Ciudad de México', 'Coyoacán'],
+    Jalisco: ['Guadalajara', 'Zapopan'],
+    'Nuevo León': ['Monterrey', 'San Pedro Garza García'],
+    Puebla: ['Puebla', 'Tehuacán'],
+    Guanajuato: ['León', 'Irapuato'],
+    'Estado de México': ['Toluca', 'Ecatepec'],
+    Veracruz: ['Veracruz', 'Xalapa'],
+    Yucatán: ['Mérida', 'Valladolid'],
+    'Quintana Roo': ['Cancún', 'Playa del Carmen'],
+    'Baja California': ['Tijuana', 'Mexicali'],
+  },
+  Argentina: {
+    'Buenos Aires': ['La Plata', 'Mar del Plata'],
+    'Ciudad Autónoma de Buenos Aires': ['Buenos Aires', 'Palermo'],
+    Córdoba: ['Córdoba', 'Villa Carlos Paz'],
+    'Santa Fe': ['Rosario', 'Santa Fe'],
+    Mendoza: ['Mendoza', 'San Rafael'],
+    Tucumán: ['San Miguel de Tucumán', 'Yerba Buena'],
+    Salta: ['Salta', 'San Ramón de la Nueva Orán'],
+    'Entre Ríos': ['Paraná', 'Concordia'],
+    Misiones: ['Posadas', 'Puerto Iguazú'],
+    Chaco: ['Resistencia', 'Presidencia Roque Sáenz Peña'],
+  },
+  Chile: {
+    'Región Metropolitana': ['Santiago', 'Puente Alto'],
+    Valparaíso: ['Valparaíso', 'Viña del Mar'],
+    Biobío: ['Concepción', 'Talcahuano'],
+    'La Araucanía': ['Temuco', 'Villarrica'],
+    'Los Lagos': ['Puerto Montt', 'Osorno'],
+    Antofagasta: ['Antofagasta', 'Calama'],
+    Coquimbo: ['La Serena', 'Coquimbo'],
+    "O'Higgins": ['Rancagua', 'San Fernando'],
+    Maule: ['Talca', 'Curicó'],
+    Tarapacá: ['Iquique', 'Alto Hospicio'],
+  },
+  Perú: {
+    Lima: ['Lima', 'Miraflores'],
+    Arequipa: ['Arequipa', 'Camaná'],
+    'La Libertad': ['Trujillo', 'Chepén'],
+    Piura: ['Piura', 'Sullana'],
+    Lambayeque: ['Chiclayo', 'Lambayeque'],
+    Cusco: ['Cusco', 'Urubamba'],
+    Junín: ['Huancayo', 'Tarma'],
+    Áncash: ['Chimbote', 'Huaraz'],
+    Loreto: ['Iquitos', 'Yurimaguas'],
+    Ica: ['Ica', 'Chincha Alta'],
+  },
+  Ecuador: {
+    Pichincha: ['Quito', 'Sangolquí'],
+    Guayas: ['Guayaquil', 'Durán'],
+    Azuay: ['Cuenca', 'Gualaceo'],
+    Manabí: ['Portoviejo', 'Manta'],
+    'El Oro': ['Machala', 'Pasaje'],
+    Tungurahua: ['Ambato', 'Baños'],
+    Loja: ['Loja', 'Catamayo'],
+    Imbabura: ['Ibarra', 'Otavalo'],
+    Chimborazo: ['Riobamba', 'Guano'],
+    Esmeraldas: ['Esmeraldas', 'Atacames'],
+  },
+};
+
 export default function Register() {
   const navigate = useNavigate();
 
@@ -39,6 +139,7 @@ export default function Register() {
     segundoNombre: '',
     primerApellido: '',
     segundoApellido: '',
+    fechaNacimiento: '',
     pais: 'Colombia',
     departamento: '',
     ciudad: '',
@@ -69,10 +170,30 @@ export default function Register() {
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+
+    setFormData((prev) => {
+      if (name === 'pais') {
+        return {
+          ...prev,
+          pais: value,
+          departamento: '',
+          ciudad: '',
+        };
+      }
+
+      if (name === 'departamento') {
+        return {
+          ...prev,
+          departamento: value,
+          ciudad: '',
+        };
+      }
+
+      return {
+        ...prev,
+        [name]: value,
+      };
+    });
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -80,25 +201,6 @@ export default function Register() {
     setLoading(true);
 
     try {
-      // =========================================================================
-      // ESTRUCTURA PARA TU FUTURA PETICIÓN AL BACKEND
-      // =========================================================================
-      /*
-      const response = await fetch('http://localhost:3000/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Error al registrar el usuario');
-      }
-      */
-
       await new Promise((resolve) => setTimeout(resolve, 1000));
       console.log('Datos listos para enviar:', formData);
 
@@ -130,6 +232,15 @@ export default function Register() {
       navigate('/login');
     }
   };
+
+  const paisesDisponibles = Object.keys(UBICACIONES);
+  const departamentosDisponibles = formData.pais
+    ? Object.keys(UBICACIONES[formData.pais] || {})
+    : [];
+  const ciudadesDisponibles =
+    formData.pais && formData.departamento
+      ? UBICACIONES[formData.pais]?.[formData.departamento] || []
+      : [];
 
   return (
     <div className={styles.pageContainer}>
@@ -236,44 +347,72 @@ export default function Register() {
               </div>
             </div>
 
+            <div className={styles.inputGroup}>
+              <label htmlFor="fechaNacimiento">Fecha de nacimiento *</label>
+              <input
+                type="date"
+                id="fechaNacimiento"
+                name="fechaNacimiento"
+                value={formData.fechaNacimiento}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
             <div className={styles.gridThree}>
               <div className={styles.inputGroup}>
                 <label htmlFor="pais">País *</label>
-                <input
-                  type="text"
+                <select
                   id="pais"
                   name="pais"
-                  placeholder="Ej. Colombia"
                   value={formData.pais}
                   onChange={handleChange}
                   required
-                />
+                >
+                  {paisesDisponibles.map((pais) => (
+                    <option key={pais} value={pais}>
+                      {pais}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className={styles.inputGroup}>
                 <label htmlFor="departamento">Departamento *</label>
-                <input
-                  type="text"
+                <select
                   id="departamento"
                   name="departamento"
-                  placeholder="Ej. Quindío"
                   value={formData.departamento}
                   onChange={handleChange}
+                  disabled={!formData.pais}
                   required
-                />
+                >
+                  <option value="">Selecciona un departamento</option>
+                  {departamentosDisponibles.map((depto) => (
+                    <option key={depto} value={depto}>
+                      {depto}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className={styles.inputGroup}>
                 <label htmlFor="ciudad">Ciudad *</label>
-                <input
-                  type="text"
+                <select
                   id="ciudad"
                   name="ciudad"
-                  placeholder="Ej. Armenia"
                   value={formData.ciudad}
                   onChange={handleChange}
+                  disabled={!formData.departamento}
                   required
-                />
+                >
+                  <option value="">Selecciona una ciudad</option>
+                  {ciudadesDisponibles.map((ciudad) => (
+                    <option key={ciudad} value={ciudad}>
+                      {ciudad}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 

@@ -30,6 +30,9 @@ interface ModalState {
   message: string;
 }
 
+// Ajusta el prefijo de ruta (ej. '/api/auth/registro') según el @RequestMapping de tu Controller
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080/api/auth';
+
 const UBICACIONES: Record<string, Record<string, string[]>> = {
   Colombia: {
     Antioquia: ['Medellín', 'Envigado'],
@@ -162,7 +165,7 @@ export default function Register() {
     if (modal.isOpen && modal.isSuccess) {
       const timer = setTimeout(() => {
         navigate('/login');
-      }, 1000);
+      }, 1500);
 
       return () => clearTimeout(timer);
     }
@@ -200,9 +203,48 @@ export default function Register() {
     e.preventDefault();
     setLoading(true);
 
+    const payload = {
+      ...formData,
+      segundoNombre: formData.segundoNombre.trim() || null,
+      segundoApellido: formData.segundoApellido.trim() || null,
+    };
+
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      console.log('Datos listos para enviar:', formData);
+      const response = await fetch(`${API_BASE_URL}/registro`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        let errorMessage = 'No se pudo completar el registro. Intenta nuevamente.';
+
+        try {
+          const errorBody = await response.json();
+          if (typeof errorBody?.mensaje === 'string') {
+            errorMessage = errorBody.mensaje;
+          } else if (typeof errorBody?.message === 'string') {
+            errorMessage = errorBody.message;
+          } else if (typeof errorBody?.detail === 'string') {
+            errorMessage = errorBody.detail;
+          } else if (errorBody?.errors && typeof errorBody.errors === 'object') {
+            const firstError = Object.values(errorBody.errors)[0];
+            if (typeof firstError === 'string') {
+              errorMessage = firstError;
+            }
+          }
+        } catch {
+          const textError = await response.text();
+          if (textError) errorMessage = textError;
+        }
+
+        throw new Error(errorMessage);
+      }
+
+      await response.json();
 
       setModal({
         isOpen: true,
@@ -218,7 +260,7 @@ export default function Register() {
         message:
           error instanceof Error
             ? error.message
-            : 'No se pudo completar el registro. Intenta nuevamente.',
+            : 'No se pudo conectar con el servidor. Verifica tu conexión.',
       });
     } finally {
       setLoading(false);

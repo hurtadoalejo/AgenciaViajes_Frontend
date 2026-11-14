@@ -9,7 +9,15 @@ interface AdminMenuItem {
 
 const MENU_ITEMS: AdminMenuItem[] = [
   { path: '/admin/empleados', label: 'Empleados' },
+  { path: '/admin/vehiculos', label: 'Vehículos' },
 ];
+
+function obtenerIniciales(nombre?: string): string {
+  if (!nombre) return 'AD';
+  const partes = nombre.trim().split(/\s+/);
+  if (partes.length === 1) return partes[0].slice(0, 2).toUpperCase();
+  return `${partes[0][0]}${partes[1][0]}`.toUpperCase();
+}
 
 export default function AdminLayout() {
   const { user, logout } = useAuth();
@@ -41,15 +49,36 @@ export default function AdminLayout() {
         </nav>
 
         <div className={styles.sidebarFooter}>
-          <div className={styles.userInfo}>
-            <span className={styles.userName}>{user?.nombre}</span>
-            <span className={styles.userRole}>{user?.rol}</span>
+          <div className={styles.userCard}>
+            <div className={styles.avatar} aria-hidden="true">
+              {obtenerIniciales(user?.nombre)}
+            </div>
+            <div className={styles.userInfo}>
+              <span className={styles.userName}>{user?.nombre}</span>
+              <span className={styles.userRole}>{user?.rol}</span>
+            </div>
           </div>
+
           <button
             type="button"
             onClick={handleLogout}
             className={styles.logoutButton}
           >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
             Cerrar sesión
           </button>
         </div>

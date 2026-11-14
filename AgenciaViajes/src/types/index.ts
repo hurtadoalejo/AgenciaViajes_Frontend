@@ -88,3 +88,16 @@ export interface SedeItem {
   idCiudad: number;
   nombreCiudad: string;
 }
+
+export interface VehiculoItem {
+  idVehiculo: number;
+  codigoIdentificacion: string;
+  tipoTransporte: string;
+  capacidad: number;
+}
+
+export interface VehiculoPayload {
+  codigoIdentificacion: string;
+  tipoTransporte: string;
+  capacidad: number;
+}

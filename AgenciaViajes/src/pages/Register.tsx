@@ -2,11 +2,10 @@ import { useState, useEffect, type FormEvent, type ChangeEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styles from './Register.module.css';
 import iconVolverAtras from '../assets/iconVolverAtras.png';
-
-type TipoIdentificacion = 'CC' | 'CE' | 'TI';
+import type { CatalogoItem } from '../types';
 
 interface RegisterFormData {
-  tipoIdentificacion: TipoIdentificacion;
+  tipoIdentificacion: string;
   numeroIdentificacion: string;
   primerNombre: string;
   segundoNombre: string;
@@ -30,8 +29,8 @@ interface ModalState {
   message: string;
 }
 
-// Ajusta el prefijo de ruta (ej. '/api/auth/registro') según el @RequestMapping de tu Controller
 const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080/api/auth';
+const API_CATALOGOS_URL = API_BASE_URL.replace(/\/auth\/?$/, '/catalogos');
 
 const UBICACIONES: Record<string, Record<string, string[]>> = {
   Colombia: {
@@ -135,8 +134,10 @@ const UBICACIONES: Record<string, Record<string, string[]>> = {
 export default function Register() {
   const navigate = useNavigate();
 
+  const [tiposIdentificacion, setTiposIdentificacion] = useState<CatalogoItem[]>([]);
+
   const [formData, setFormData] = useState<RegisterFormData>({
-    tipoIdentificacion: 'CC',
+    tipoIdentificacion: '',
     numeroIdentificacion: '',
     primerNombre: '',
     segundoNombre: '',
@@ -152,6 +153,36 @@ export default function Register() {
     correo: '',
     contrasena: '',
   });
+
+  useEffect(() => {
+    let activo = true;
+
+    const cargarTiposIdentificacion = async () => {
+      try {
+        const res = await fetch(`${API_CATALOGOS_URL}/tipos-identificacion`);
+        if (!res.ok) return;
+
+        const data: CatalogoItem[] = await res.json();
+        if (activo) {
+          setTiposIdentificacion(data);
+          if (data.length > 0) {
+            setFormData((prev) => ({
+              ...prev,
+              tipoIdentificacion: prev.tipoIdentificacion || data[0].nombre,
+            }));
+          }
+        }
+      } catch {
+        // Si falla la red, el select queda vacío sin romper la vista
+      }
+    };
+
+    cargarTiposIdentificacion();
+
+    return () => {
+      activo = false;
+    };
+  }, []);
 
   const [loading, setLoading] = useState(false);
   const [modal, setModal] = useState<ModalState>({
@@ -201,6 +232,15 @@ export default function Register() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (formData.fechaNacimiento > fechaMaximaNacimiento) {
+      setModal({
+        isOpen: true,
+        isSuccess: false,
+        title: 'Fecha no válida',
+        message: 'La persona debe tener al menos 7 días de nacida para registrarse.',
+      });
+      return;
+    }
     setLoading(true);
 
     const payload = {
@@ -284,6 +324,16 @@ export default function Register() {
       ? UBICACIONES[formData.pais]?.[formData.departamento] || []
       : [];
 
+  const hoy = new Date();
+  const limiteNacimiento = new Date(
+    hoy.getFullYear(),
+    hoy.getMonth(),
+    hoy.getDate() - 7
+  );
+  const fechaMaximaNacimiento = `${limiteNacimiento.getFullYear()}-${String(
+    limiteNacimiento.getMonth() + 1
+  ).padStart(2, '0')}-${String(limiteNacimiento.getDate()).padStart(2, '0')}`;
+
   return (
     <div className={styles.pageContainer}>
       <div className={styles.topBar}>
@@ -315,9 +365,14 @@ export default function Register() {
                   onChange={handleChange}
                   required
                 >
-                  <option value="CC">Cédula de Ciudadanía</option>
-                  <option value="CE">Cédula de Extranjería</option>
-                  <option value="TI">Tarjeta de Identidad</option>
+                  {tiposIdentificacion.length === 0 && (
+                    <option value="">Cargando tipos...</option>
+                  )}
+                  {tiposIdentificacion.map((tipo) => (
+                    <option key={tipo.id} value={tipo.nombre}>
+                      {tipo.nombre}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -395,6 +450,7 @@ export default function Register() {
                 type="date"
                 id="fechaNacimiento"
                 name="fechaNacimiento"
+                max={fechaMaximaNacimiento}
                 value={formData.fechaNacimiento}
                 onChange={handleChange}
                 required
@@ -554,9 +610,8 @@ export default function Register() {
         <div className={styles.modalBackdrop} role="dialog" aria-modal="true">
           <div className={styles.modalBox}>
             <div
-              className={`${styles.modalIcon} ${
-                modal.isSuccess ? styles.iconSuccess : styles.iconError
-              }`}
+              className={`${styles.modalIcon} ${modal.isSuccess ? styles.iconSuccess : styles.iconError
+                }`}
             >
               {modal.isSuccess ? '✓' : '✕'}
             </div>

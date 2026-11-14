@@ -200,6 +200,9 @@ export default function EmpleadosAdmin() {
         const cargosData: CatalogoItem[] = cargosRes.ok ? await cargosRes.json() : [];
         const rolesRaw: CatalogoItem[] = rolesRes.ok ? await rolesRes.json() : [];
         const tiposIdData: CatalogoItem[] = tiposIdRes.ok ? await tiposIdRes.json() : [];
+        const tiposIdFiltrados = tiposIdData.filter(
+          (tipo) => tipo.nombre.trim().toUpperCase() !== 'TI'
+        );
 
         // Excluye el rol CLIENTE para dejar solo roles válidos de empleados (EMPLEADO, ADMIN, etc.)
         const rolesEmpleado = rolesRaw.filter(
@@ -211,7 +214,7 @@ export default function EmpleadosAdmin() {
           setSedes(sedesData);
           setCargos(cargosData);
           setRoles(rolesEmpleado);
-          setTiposIdentificacion(tiposIdData);
+          setTiposIdentificacion(tiposIdFiltrados);
         }
       } catch (err) {
         if (activo) {
@@ -271,7 +274,7 @@ export default function EmpleadosAdmin() {
 
     setForm({
       ...INITIAL_FORM,
-      tipoIdentificacion: tiposIdentificacion[0]?.nombre ?? '',
+      tipoIdentificacion: tiposIdentificacion[0]?.nombre ?? 'CC',
       rol: rolPorDefecto,
       idCargo: cargos[0] ? String(cargos[0].id) : '',
       idSede: sedes[0] ? String(sedes[0].idSede) : '',
@@ -366,6 +369,10 @@ export default function EmpleadosAdmin() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (form.fechaNacimiento > fechaMaximaNacimiento) {
+      setModalError('El empleado debe tener al menos 18 años de edad.');
+      return;
+    }
     setSubmitting(true);
     setModalError(null);
     setFeedback(null);
@@ -502,6 +509,15 @@ export default function EmpleadosAdmin() {
       ? UBICACIONES[form.pais]?.[form.departamento] || []
       : [];
 
+  const hoy = new Date();
+  const fechaMaximaNacimiento = new Date(
+    hoy.getFullYear() - 18,
+    hoy.getMonth(),
+    hoy.getDate()
+  )
+    .toISOString()
+    .split('T')[0];
+
   return (
     <div className={styles.pageWrapper}>
       <div className={styles.headerCard}>
@@ -517,7 +533,6 @@ export default function EmpleadosAdmin() {
         </button>
       </div>
 
-      {/* Barra de filtros */}
       <div className={styles.filterCard}>
         <div className={styles.filterGrid}>
           <div className={styles.inputGroup}>
@@ -868,6 +883,7 @@ export default function EmpleadosAdmin() {
                     value={form.fechaNacimiento}
                     onChange={handleChange}
                     required
+                    max={fechaMaximaNacimiento}
                   />
                 </div>
 
@@ -1095,8 +1111,8 @@ export default function EmpleadosAdmin() {
                   {submitting
                     ? 'Guardando...'
                     : editingId !== null
-                    ? 'Guardar cambios'
-                    : 'Registrar empleado'}
+                      ? 'Guardar cambios'
+                      : 'Registrar empleado'}
                 </button>
               </div>
             </form>

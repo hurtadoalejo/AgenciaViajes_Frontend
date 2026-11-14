@@ -190,6 +190,16 @@ export default function Profile() {
     });
   };
 
+  useEffect(() => {
+    if (!feedback) return;
+
+    const timer = setTimeout(() => {
+      setFeedback(null);
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [feedback]);
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!perfil || !user) return;
@@ -302,9 +312,8 @@ export default function Profile() {
 
           {feedback && (
             <div
-              className={`${styles.alert} ${
-                feedback.type === 'success' ? styles.alertSuccess : styles.alertError
-              }`}
+              className={`${styles.alert} ${feedback.type === 'success' ? styles.alertSuccess : styles.alertError
+                }`}
             >
               {feedback.text}
             </div>

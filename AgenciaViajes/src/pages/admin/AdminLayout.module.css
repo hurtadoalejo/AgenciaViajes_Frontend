@@ -1,0 +1,147 @@
+.adminContainer {
+  min-height: 100vh;
+  display: flex;
+  background-color: #f3f5f9;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #0f172a;
+}
+
+.sidebar {
+  width: 270px;
+  background-color: #ffffff;
+  border-right: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.75rem 1.25rem;
+  box-shadow: 4px 0 20px rgba(15, 23, 42, 0.04);
+  flex-shrink: 0;
+}
+
+.brand {
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.brandBadge {
+  display: inline-block;
+  background-color: #eff6ff;
+  color: #2563eb;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.brandTitle {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #0f172a;
+}
+
+.brandSubtitle {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.navMenu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  flex: 1;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  text-decoration: none;
+  color: #334155;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.navItem:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.navItemActive {
+  background-color: #2563eb;
+  color: #ffffff;
+}
+
+.navItemActive:hover {
+  background-color: #1d4ed8;
+  color: #ffffff;
+}
+
+.sidebarFooter {
+  padding-top: 1.25rem;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.userName {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.userRole {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.logoutButton {
+  width: 100%;
+  padding: 0.65rem;
+  background-color: #fee2e2;
+  color: #dc2626;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.logoutButton:hover {
+  background-color: #fecaca;
+}
+
+.mainContent {
+  flex: 1;
+  padding: 2rem 2.5rem;
+  overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  .adminContainer {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    box-sizing: border-box;
+    border-right: none;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .mainContent {
+    padding: 1.5rem;
+  }
+}

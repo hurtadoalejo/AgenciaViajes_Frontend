@@ -38,3 +38,53 @@ export interface EmpleadoPerfil {
   idSede: number;
   nombreSede: string;
 }
+
+export interface CargoOption {
+  idCargo: number;
+  nombreCargo: string;
+}
+
+export interface SedeOption {
+  idSede: number;
+  nombreSede: string;
+  direccion?: string;
+}
+
+export interface CatalogoItem {
+  id: number;
+  nombre: string;
+}
+
+export interface EmpleadoActualizarPayload {
+  tipoIdentificacion: string;
+  numeroIdentificacion: string;
+  primerNombre: string;
+  segundoNombre: string | null;
+  primerApellido: string;
+  segundoApellido: string | null;
+  fechaNacimiento: string;
+  pais: string;
+  departamento: string;
+  ciudad: string;
+  direccion: string;
+  indicativo: string;
+  telefono: string;
+  correo: string;
+  salario: number;
+  fechaContratacion: string;
+  idCargo: number;
+  idSede: number;
+  rol: string;
+}
+
+export interface EmpleadoCrearPayload extends EmpleadoActualizarPayload {
+  contrasena: string;
+}
+
+export interface SedeItem {
+  idSede: number;
+  nombreSede: string;
+  direccion: string;
+  idCiudad: number;
+  nombreCiudad: string;
+}

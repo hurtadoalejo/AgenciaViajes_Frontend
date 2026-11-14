@@ -15,6 +15,7 @@ interface ModalState {
   isSuccess: boolean;
   title: string;
   message: string;
+  redirectTo: string;
 }
 
 const API_URL = 'http://localhost:8080/api/auth/login';
@@ -34,17 +35,18 @@ export default function Login() {
     isSuccess: false,
     title: '',
     message: '',
+    redirectTo: '/',
   });
 
   useEffect(() => {
     if (modal.isOpen && modal.isSuccess) {
       const timer = setTimeout(() => {
-        navigate('/');
+        navigate(modal.redirectTo, { replace: true });
       }, 1000);
 
       return () => clearTimeout(timer);
     }
-  }, [modal.isOpen, modal.isSuccess, navigate]);
+  }, [modal.isOpen, modal.isSuccess, modal.redirectTo, navigate]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -72,6 +74,7 @@ export default function Login() {
           isSuccess: false,
           title: 'Error al iniciar sesión',
           message: errorData?.message || 'Correo o contraseña incorrectos.',
+          redirectTo: '/',
         });
         return;
       }
@@ -109,11 +112,17 @@ export default function Login() {
 
       login(usuarioSesion);
 
+      const esAdmin = Boolean(data.rol?.toUpperCase().includes('ADMIN'));
+      const destino = esAdmin ? '/admin' : '/';
+
       setModal({
         isOpen: true,
         isSuccess: true,
         title: `¡Bienvenido de nuevo${nombreCorto ? `, ${nombreCorto}` : ''}!`,
-        message: 'Redirigiendo a la página principal...',
+        message: esAdmin
+          ? 'Redirigiendo al panel de administración...'
+          : 'Redirigiendo a la página principal...',
+        redirectTo: destino,
       });
     } catch {
       setModal({
@@ -121,6 +130,7 @@ export default function Login() {
         isSuccess: false,
         title: 'Error de conexión',
         message: 'No se pudo conectar con el servidor. Verifica que el backend esté encendido.',
+        redirectTo: '/',
       });
     } finally {
       setLoading(false);
@@ -129,9 +139,10 @@ export default function Login() {
 
   const handleCloseModal = () => {
     const wasSuccess = modal.isSuccess;
+    const destino = modal.redirectTo;
     setModal((prev) => ({ ...prev, isOpen: false }));
     if (wasSuccess) {
-      navigate('/');
+      navigate(destino, { replace: true });
     }
   };
 

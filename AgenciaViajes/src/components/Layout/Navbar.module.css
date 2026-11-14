@@ -8,6 +8,8 @@
   border-bottom: 1px solid #e2e8f0;
   box-shadow: 0 4px 15px rgba(15, 23, 42, 0.05);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  position: relative;
+  z-index: 50;
 }
 
 .brandLink {
@@ -22,17 +24,9 @@
   transition: color 0.25s ease;
 }
 
-.titleAvion {
-  color: #2563eb;
-}
-
-.titleTren {
-  color: #d97706;
-}
-
-.titleBus {
-  color: #dc2626;
-}
+.titleAvion { color: #2563eb; }
+.titleTren { color: #d97706; }
+.titleBus { color: #dc2626; }
 
 .loginBtn {
   display: inline-flex;
@@ -63,12 +57,124 @@
   object-fit: contain;
 }
 
-@media (max-width: 640px) {
-  .navbar {
-    padding: 0.85rem 1rem;
-  }
+/* Estilos del usuario logueado */
+.userMenuContainer {
+  position: relative;
+}
 
-  .title {
-    font-size: 1.25rem;
-  }
+.userBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid #cbd5e1;
+  background-color: #ffffff;
+  color: #1e293b;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.userBtn:hover {
+  background-color: #f8fafc;
+  border-color: #94a3b8;
+}
+
+.avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: #2563eb;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.userName {
+  max-width: 160px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chevron {
+  font-size: 0.7rem;
+  color: #64748b;
+}
+
+.dropdownMenu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.5rem);
+  width: 230px;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
+  overflow: hidden;
+  z-index: 100;
+}
+
+.dropdownHeader {
+  padding: 0.75rem 1rem;
+  background-color: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.dropdownEmail {
+  font-size: 0.82rem;
+  color: #475569;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dropdownRole {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #2563eb;
+  text-transform: uppercase;
+}
+
+.dropdownItem {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.7rem 1rem;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: #1e293b;
+  background: none;
+  border: none;
+  text-decoration: none;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: background-color 0.15s ease;
+}
+
+.dropdownItem:hover {
+  background-color: #f1f5f9;
+}
+
+.logoutItem {
+  color: #dc2626;
+  border-top: 1px solid #f1f5f9;
+}
+
+.logoutItem:hover {
+  background-color: #fef2f2;
+}
+
+@media (max-width: 640px) {
+  .navbar { padding: 0.85rem 1rem; }
+  .title { font-size: 1.25rem; }
+  .userName { display: none; }
 }

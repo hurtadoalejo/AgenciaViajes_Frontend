@@ -2,6 +2,8 @@ import { useState, useEffect, type FormEvent, type ChangeEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styles from './Login.module.css';
 import iconVolverAtras from '../assets/iconVolverAtras.png';
+import { useAuth } from '../hooks/useAuth';
+import type { AuthUser } from '../types';
 
 interface LoginFormData {
   correo: string;
@@ -15,7 +17,10 @@ interface ModalState {
   message: string;
 }
 
+const API_URL = 'http://localhost:8080/api/auth/login';
+
 export default function Login() {
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState<LoginFormData>({
@@ -54,24 +59,65 @@ export default function Login() {
     setLoading(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      console.log('Credenciales listas para enviar:', formData);
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          correo: formData.correo,
+          contrasena: formData.contrasena,
+        }),
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          const errorData = await response.json().catch(() => null);
+          throw new Error(
+            errorData?.message || 'Correo o contraseña incorrectos.'
+          );
+        }
+        throw new Error('Ocurrió un error inesperado en el servidor.');
+      }
+
+      const data = await response.json();
+
+      let nombreCorto = data.nombre || data.nombreCompleto || '';
+
+      if (data.idUsuario) {
+        try {
+          if (data.tipoUsuario === 'EMPLEADO') {
+            const empRes = await fetch(`http://localhost:8080/api/empleados/${data.idUsuario}`);
+            if (empRes.ok) {
+              const empData = await empRes.json();
+              const dp = empData.datosPersonales;
+              nombreCorto = `${dp.primerNombre} ${dp.primerApellido}`.trim();
+            }
+          } else {
+            const cliRes = await fetch(`http://localhost:8080/api/clientes/${data.idUsuario}`);
+            if (cliRes.ok) {
+              const cliData = await cliRes.json();
+              nombreCorto = `${cliData.primerNombre} ${cliData.primerApellido}`.trim();
+            }
+          }
+        } catch {
+          // Si falla la consulta secundaria, continúa sin bloquear el login
+        }
+      }
+
+      const usuarioSesion: AuthUser = {
+        ...data,
+        nombre: nombreCorto || data.correo,
+        nombreCorto: nombreCorto || data.correo,
+      };
+
+      login(usuarioSesion);
 
       setModal({
         isOpen: true,
         isSuccess: true,
-        title: '¡Bienvenido de nuevo!',
+        title: `¡Bienvenido de nuevo${nombreCorto ? `, ${nombreCorto}` : ''}!`,
         message: 'Redirigiendo a la página principal...',
-      });
-    } catch (error) {
-      setModal({
-        isOpen: true,
-        isSuccess: false,
-        title: 'Error al iniciar sesión',
-        message:
-          error instanceof Error
-            ? error.message
-            : 'No se pudo iniciar sesión. Verifica tus datos e intenta de nuevo.',
       });
     } finally {
       setLoading(false);
@@ -155,9 +201,8 @@ export default function Login() {
         <div className={styles.modalBackdrop} role="dialog" aria-modal="true">
           <div className={styles.modalBox}>
             <div
-              className={`${styles.modalIcon} ${
-                modal.isSuccess ? styles.iconSuccess : styles.iconError
-              }`}
+              className={`${styles.modalIcon} ${modal.isSuccess ? styles.iconSuccess : styles.iconError
+                }`}
             >
               {modal.isSuccess ? '✓' : '✕'}
             </div>

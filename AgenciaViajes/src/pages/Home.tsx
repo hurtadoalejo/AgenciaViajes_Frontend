@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import styles from '../App.module.css'; // Ajusta la ruta si mueves el CSS
+import styles from '../App.module.css';
 import Navbar from '../components/Layout/Navbar';
 import ModeSelector from '../components/SearchForm/ModeSelector';
 import TripType from '../components/SearchForm/TripType';

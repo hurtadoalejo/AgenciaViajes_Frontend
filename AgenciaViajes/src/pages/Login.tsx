@@ -61,23 +61,19 @@ export default function Login() {
     try {
       const response = await fetch(API_URL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          correo: formData.correo,
-          contrasena: formData.contrasena,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
       });
 
       if (!response.ok) {
-        if (response.status === 401) {
-          const errorData = await response.json().catch(() => null);
-          throw new Error(
-            errorData?.message || 'Correo o contraseña incorrectos.'
-          );
-        }
-        throw new Error('Ocurrió un error inesperado en el servidor.');
+        const errorData = await response.json().catch(() => null);
+        setModal({
+          isOpen: true,
+          isSuccess: false,
+          title: 'Error al iniciar sesión',
+          message: errorData?.message || 'Correo o contraseña incorrectos.',
+        });
+        return;
       }
 
       const data = await response.json();
@@ -118,6 +114,13 @@ export default function Login() {
         isSuccess: true,
         title: `¡Bienvenido de nuevo${nombreCorto ? `, ${nombreCorto}` : ''}!`,
         message: 'Redirigiendo a la página principal...',
+      });
+    } catch {
+      setModal({
+        isOpen: true,
+        isSuccess: false,
+        title: 'Error de conexión',
+        message: 'No se pudo conectar con el servidor. Verifica que el backend esté encendido.',
       });
     } finally {
       setLoading(false);
@@ -201,8 +204,9 @@ export default function Login() {
         <div className={styles.modalBackdrop} role="dialog" aria-modal="true">
           <div className={styles.modalBox}>
             <div
-              className={`${styles.modalIcon} ${modal.isSuccess ? styles.iconSuccess : styles.iconError
-                }`}
+              className={`${styles.modalIcon} ${
+                modal.isSuccess ? styles.iconSuccess : styles.iconError
+              }`}
             >
               {modal.isSuccess ? '✓' : '✕'}
             </div>

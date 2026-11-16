@@ -8,6 +8,9 @@ import AdminRoute from './components/Admin/AdminRoute';
 import AdminLayout from './pages/admin/AdminLayout';
 import EmpleadosAdmin from './pages/admin/EmpleadosAdmin';
 import VehiculosAdmin from './pages/admin/VehiculosAdmin';
+import OfertasAdmin from './pages/admin/OfertasAdmin';
+import PlanesAdmin from './pages/admin/PlanesAdmin';
+import ReportesAdmin from './pages/admin/ReportesAdmin';
 
 export default function App() {
   return (
@@ -23,6 +26,9 @@ export default function App() {
               <Route index element={<Navigate to="empleados" replace />} />
               <Route path="empleados" element={<EmpleadosAdmin />} />
               <Route path="vehiculos" element={<VehiculosAdmin />} />
+              <Route path="ofertas" element={<OfertasAdmin />} />
+              <Route path="planes" element={<PlanesAdmin />} />
+              <Route path="reportes" element={<ReportesAdmin />} />
             </Route>
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

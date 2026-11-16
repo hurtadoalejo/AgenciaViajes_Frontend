@@ -10,6 +10,9 @@ interface AdminMenuItem {
 const MENU_ITEMS: AdminMenuItem[] = [
   { path: '/admin/empleados', label: 'Empleados' },
   { path: '/admin/vehiculos', label: 'Vehículos' },
+  { path: '/admin/ofertas', label: 'Ofertas' },
+  { path: '/admin/planes', label: 'Planes' },
+  { path: '/admin/reportes', label: 'Reportes' },
 ];
 
 function obtenerIniciales(nombre?: string): string {

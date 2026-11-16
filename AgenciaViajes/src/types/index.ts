@@ -101,3 +101,37 @@ export interface VehiculoPayload {
   tipoTransporte: string;
   capacidad: number;
 }
+
+export interface OfertaItem {
+  idOferta: number;
+  titulo: string;
+  descripcion: string | null;
+  porcentajeDescuento: number;
+  fechaInicio: string;
+  fechaFin: string;
+}
+
+export interface OfertaPayload {
+  titulo: string;
+  descripcion: string | null;
+  porcentajeDescuento: number;
+  fechaInicio: string;
+  fechaFin: string;
+}
+
+export interface PlanItem {
+  idPlan: number;
+  nombrePlan: string;
+  descripcionPlan: string | null;
+  pesoMaxEquipaje: number;
+  incluyeCheckIn: boolean;
+  precioExtra: number;
+}
+
+export interface PlanPayload {
+  nombrePlan: string;
+  descripcionPlan: string | null;
+  pesoMaxEquipaje: number;
+  incluyeCheckIn: boolean;
+  precioExtra: number;
+}

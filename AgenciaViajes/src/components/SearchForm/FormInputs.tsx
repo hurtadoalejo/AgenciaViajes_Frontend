@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import styles from './FormInputs.module.css';
 
 import DatePicker from 'react-datepicker';
@@ -11,19 +10,24 @@ import iconDestino from '../../assets/iconDestino.png';
 
 import { EUROPEAN_CITIES } from './europeanCities';
 
-interface FormInputsProps {
-  tripType: 'ida-vuelta' | 'solo-ida';
+/** Valores del buscador. origin y destination son códigos de EUROPEAN_CITIES (MAD, PAR...). */
+export interface SearchValues {
+  origin: string;
+  destination: string;
+  passengers: string;
+  departureDate: Date | null;
+  returnDate: Date | null;
 }
 
-export default function FormInputs({ tripType }: FormInputsProps) {
-  const today = new Date();
+interface FormInputsProps {
+  tripType: 'ida-vuelta' | 'solo-ida';
+  values: SearchValues;
+  onChange: (cambios: Partial<SearchValues>) => void;
+}
 
-  const [origin, setOrigin] = useState<string>('');
-  const [destination, setDestination] = useState<string>('');
-  const [passengers, setPassengers] = useState<string>('1');
-  
-  const [departureDate, setDepartureDate] = useState<Date | null>(null);
-  const [returnDate, setReturnDate] = useState<Date | null>(null);
+export default function FormInputs({ tripType, values, onChange }: FormInputsProps) {
+  const today = new Date();
+  const { origin, destination, passengers, departureDate, returnDate } = values;
 
   const isSoloIda = tripType === 'solo-ida';
 
@@ -37,7 +41,6 @@ export default function FormInputs({ tripType }: FormInputsProps) {
 
   return (
     <div className={styles.gridContainer}>
-
       <div className={styles.inputGroup}>
         <span className={styles.label}>Origen</span>
         <div className={styles.inputWrapper}>
@@ -45,9 +48,9 @@ export default function FormInputs({ tripType }: FormInputsProps) {
           <span className={styles.selectedText}>
             {origin ? getCityLabel(origin) : 'Selecciona ciudad origen'}
           </span>
-          <select 
-            value={origin} 
-            onChange={(e) => setOrigin(e.target.value)}
+          <select
+            value={origin}
+            onChange={(e) => onChange({ origin: e.target.value })}
             className={styles.selectOverlay}
           >
             <option value="" disabled>Selecciona ciudad origen</option>
@@ -60,17 +63,17 @@ export default function FormInputs({ tripType }: FormInputsProps) {
         </div>
       </div>
 
-      <div className={`${styles.inputGroup} ${isSoloIda ? styles.hiddenKeepSpace : ''}`}>
+      {/* El destino se pide siempre; en "Solo ida" lo que se oculta es la fecha de regreso. */}
+      <div className={styles.inputGroup}>
         <span className={styles.label}>Destino</span>
         <div className={styles.inputWrapper}>
           <img src={iconDestino} className={styles.inputIcon} alt="" />
           <span className={styles.selectedText}>
             {destination ? getCityLabel(destination) : 'Selecciona ciudad destino'}
           </span>
-          <select 
-            value={destination} 
-            onChange={(e) => setDestination(e.target.value)}
-            disabled={isSoloIda}
+          <select
+            value={destination}
+            onChange={(e) => onChange({ destination: e.target.value })}
             className={styles.selectOverlay}
           >
             <option value="" disabled>Selecciona ciudad destino</option>
@@ -90,9 +93,10 @@ export default function FormInputs({ tripType }: FormInputsProps) {
           <DatePicker
             selected={departureDate}
             onChange={(date: Date | null) => {
-              setDepartureDate(date);
               if (returnDate && date && returnDate < date) {
-                setReturnDate(null);
+                onChange({ departureDate: date, returnDate: null });
+              } else {
+                onChange({ departureDate: date });
               }
             }}
             minDate={today}
@@ -111,7 +115,7 @@ export default function FormInputs({ tripType }: FormInputsProps) {
           <img src={iconCalendar} className={styles.inputIcon} alt="" />
           <DatePicker
             selected={returnDate}
-            onChange={(date: Date | null) => setReturnDate(date)}
+            onChange={(date: Date | null) => onChange({ returnDate: date })}
             minDate={departureDate || today}
             dateFormat="dd/MM/yyyy"
             placeholderText="Seleccionar fecha"
@@ -130,9 +134,9 @@ export default function FormInputs({ tripType }: FormInputsProps) {
           <span className={styles.selectedText}>
             {passengers} {Number(passengers) === 1 ? 'Pasajero' : 'Pasajeros'}
           </span>
-          <select 
-            value={passengers} 
-            onChange={(e) => setPassengers(e.target.value)}
+          <select
+            value={passengers}
+            onChange={(e) => onChange({ passengers: e.target.value })}
             className={styles.selectOverlay}
           >
             <option value="1">1</option>
@@ -142,7 +146,6 @@ export default function FormInputs({ tripType }: FormInputsProps) {
           </select>
         </div>
       </div>
-
     </div>
   );
 }

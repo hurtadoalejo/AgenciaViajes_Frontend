@@ -1,5 +1,5 @@
 import { useState, useEffect, type FormEvent, type ChangeEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import styles from './Login.module.css';
 import iconVolverAtras from '../assets/iconVolverAtras.png';
 import { useAuth } from '../hooks/useAuth';
@@ -23,6 +23,9 @@ const API_URL = 'http://localhost:8080/api/auth/login';
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  // Si viene de la compra (/reserva), al iniciar sesión vuelve allá.
+  const volverA = (location.state as { from?: string } | null)?.from;
 
   const [formData, setFormData] = useState<LoginFormData>({
     correo: '',
@@ -113,7 +116,7 @@ export default function Login() {
       login(usuarioSesion);
 
       const esAdmin = Boolean(data.rol?.toUpperCase().includes('ADMIN'));
-      const destino = esAdmin ? '/admin' : '/';
+      const destino = volverA ?? (esAdmin ? '/admin' : '/');
 
       setModal({
         isOpen: true,

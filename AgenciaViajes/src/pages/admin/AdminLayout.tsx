@@ -12,6 +12,9 @@ const MENU_ITEMS: AdminMenuItem[] = [
   { path: '/admin/vehiculos', label: 'Vehículos' },
   { path: '/admin/ofertas', label: 'Ofertas' },
   { path: '/admin/planes', label: 'Planes' },
+  { path: '/admin/sedes', label: 'Sedes' },
+  { path: '/admin/rutas', label: 'Rutas' },
+  { path: '/admin/programacion', label: 'Programación' },
   { path: '/admin/reportes', label: 'Reportes' },
 ];
 

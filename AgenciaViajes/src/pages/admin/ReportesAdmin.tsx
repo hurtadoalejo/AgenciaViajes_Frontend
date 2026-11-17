@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import styles from './AdminCrud.module.css';
 import ReportesSimples from './reportes/ReportesSimples';
+import ReportesIntermedios from './reportes/ReportesIntermedios';
+import ReportesAvanzados from './reportes/ReportesAvanzados';
 
 type NivelComplejidad = 'SIMPLES' | 'INTERMEDIOS' | 'AVANZADOS';
 
@@ -45,22 +47,8 @@ export default function ReportesAdmin() {
       </div>
 
       {nivel === 'SIMPLES' && <ReportesSimples />}
-
-      {nivel === 'INTERMEDIOS' && (
-        <div className={styles.tableCard}>
-          <div className={styles.emptyState}>
-            Módulo reservado para los 4 Reportes Intermedios (consultas multitabla con JOIN, GROUP BY y HAVING).
-          </div>
-        </div>
-      )}
-
-      {nivel === 'AVANZADOS' && (
-        <div className={styles.tableCard}>
-          <div className={styles.emptyState}>
-            Módulo reservado para los 3 Reportes Avanzados (consultas con subconsultas SQL).
-          </div>
-        </div>
-      )}
+      {nivel === 'INTERMEDIOS' && <ReportesIntermedios />}
+      {nivel === 'AVANZADOS' && <ReportesAvanzados />}
     </div>
   );
 }

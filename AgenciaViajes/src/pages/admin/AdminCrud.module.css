@@ -412,3 +412,46 @@
 .clearFilterButton:hover {
   background-color: #e2e8f0;
 }
+
+.filterGrid > .inputGroup {
+  min-width: 0;
+}
+
+.filterGrid {
+  align-items: end;
+}
+
+.filterGrid > .inputGroup {
+  min-width: 0;
+  position: relative;
+}
+
+.filterGrid select,
+.filterGrid input {
+  height: 42px;
+  box-sizing: border-box;
+  margin: 0;
+}
+
+.datePickerWrapper,
+.datePickerWrapper :global(.react-datepicker__input-container) {
+  display: flex;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.datePickerWrapper input {
+  width: 100%;
+  height: 42px;
+  box-sizing: border-box;
+  margin: 0;
+}
+
+.inputGroup :global(.react-datepicker__tab-loop) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+}

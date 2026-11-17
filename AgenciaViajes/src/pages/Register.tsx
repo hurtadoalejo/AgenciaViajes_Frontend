@@ -29,112 +29,36 @@ interface ModalState {
   message: string;
 }
 
+type UbicacionesMap = Record<string, Record<string, string[]>>;
+
+interface IndicativoItem {
+  idPais: number;
+  nombrePais: string;
+  indicativo: string;
+}
+
 const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080/api/auth';
 const API_CATALOGOS_URL = API_BASE_URL.replace(/\/auth\/?$/, '/catalogos');
 
-const UBICACIONES: Record<string, Record<string, string[]>> = {
-  Colombia: {
-    Antioquia: ['Medellín', 'Envigado'],
-    Atlántico: ['Barranquilla', 'Soledad'],
-    'Bogotá D.C.': ['Bogotá', 'Usaquén'],
-    Bolívar: ['Cartagena', 'Magangué'],
-    Boyacá: ['Tunja', 'Duitama'],
-    Caldas: ['Manizales', 'Villamaría'],
-    Cundinamarca: ['Soacha', 'Chía'],
-    Quindío: ['Armenia', 'Calarcá'],
-    Risaralda: ['Pereira', 'Dosquebradas'],
-    'Valle del Cauca': ['Cali', 'Palmira'],
-  },
-  'Estados Unidos': {
-    California: ['Los Ángeles', 'San Francisco'],
-    Texas: ['Houston', 'Austin'],
-    Florida: ['Miami', 'Orlando'],
-    'Nueva York': ['Nueva York', 'Búfalo'],
-    Illinois: ['Chicago', 'Aurora'],
-    Pensilvania: ['Filadelfia', 'Pittsburgh'],
-    Ohio: ['Columbus', 'Cleveland'],
-    Georgia: ['Atlanta', 'Savannah'],
-    'Carolina del Norte': ['Charlotte', 'Raleigh'],
-    Míchigan: ['Detroit', 'Grand Rapids'],
-  },
-  España: {
-    Andalucía: ['Sevilla', 'Málaga'],
-    Cataluña: ['Barcelona', 'Girona'],
-    'Comunidad de Madrid': ['Madrid', 'Alcalá de Henares'],
-    'Comunidad Valenciana': ['Valencia', 'Alicante'],
-    Galicia: ['Vigo', 'A Coruña'],
-    'Castilla y León': ['Valladolid', 'Salamanca'],
-    'País Vasco': ['Bilbao', 'San Sebastián'],
-    Canarias: ['Las Palmas', 'Santa Cruz de Tenerife'],
-    'Castilla-La Mancha': ['Toledo', 'Albacete'],
-    Aragón: ['Zaragoza', 'Huesca'],
-  },
-  México: {
-    'Ciudad de México': ['Ciudad de México', 'Coyoacán'],
-    Jalisco: ['Guadalajara', 'Zapopan'],
-    'Nuevo León': ['Monterrey', 'San Pedro Garza García'],
-    Puebla: ['Puebla', 'Tehuacán'],
-    Guanajuato: ['León', 'Irapuato'],
-    'Estado de México': ['Toluca', 'Ecatepec'],
-    Veracruz: ['Veracruz', 'Xalapa'],
-    Yucatán: ['Mérida', 'Valladolid'],
-    'Quintana Roo': ['Cancún', 'Playa del Carmen'],
-    'Baja California': ['Tijuana', 'Mexicali'],
-  },
-  Argentina: {
-    'Buenos Aires': ['La Plata', 'Mar del Plata'],
-    'Ciudad Autónoma de Buenos Aires': ['Buenos Aires', 'Palermo'],
-    Córdoba: ['Córdoba', 'Villa Carlos Paz'],
-    'Santa Fe': ['Rosario', 'Santa Fe'],
-    Mendoza: ['Mendoza', 'San Rafael'],
-    Tucumán: ['San Miguel de Tucumán', 'Yerba Buena'],
-    Salta: ['Salta', 'San Ramón de la Nueva Orán'],
-    'Entre Ríos': ['Paraná', 'Concordia'],
-    Misiones: ['Posadas', 'Puerto Iguazú'],
-    Chaco: ['Resistencia', 'Presidencia Roque Sáenz Peña'],
-  },
-  Chile: {
-    'Región Metropolitana': ['Santiago', 'Puente Alto'],
-    Valparaíso: ['Valparaíso', 'Viña del Mar'],
-    Biobío: ['Concepción', 'Talcahuano'],
-    'La Araucanía': ['Temuco', 'Villarrica'],
-    'Los Lagos': ['Puerto Montt', 'Osorno'],
-    Antofagasta: ['Antofagasta', 'Calama'],
-    Coquimbo: ['La Serena', 'Coquimbo'],
-    "O'Higgins": ['Rancagua', 'San Fernando'],
-    Maule: ['Talca', 'Curicó'],
-    Tarapacá: ['Iquique', 'Alto Hospicio'],
-  },
-  Perú: {
-    Lima: ['Lima', 'Miraflores'],
-    Arequipa: ['Arequipa', 'Camaná'],
-    'La Libertad': ['Trujillo', 'Chepén'],
-    Piura: ['Piura', 'Sullana'],
-    Lambayeque: ['Chiclayo', 'Lambayeque'],
-    Cusco: ['Cusco', 'Urubamba'],
-    Junín: ['Huancayo', 'Tarma'],
-    Áncash: ['Chimbote', 'Huaraz'],
-    Loreto: ['Iquitos', 'Yurimaguas'],
-    Ica: ['Ica', 'Chincha Alta'],
-  },
-  Ecuador: {
-    Pichincha: ['Quito', 'Sangolquí'],
-    Guayas: ['Guayaquil', 'Durán'],
-    Azuay: ['Cuenca', 'Gualaceo'],
-    Manabí: ['Portoviejo', 'Manta'],
-    'El Oro': ['Machala', 'Pasaje'],
-    Tungurahua: ['Ambato', 'Baños'],
-    Loja: ['Loja', 'Catamayo'],
-    Imbabura: ['Ibarra', 'Otavalo'],
-    Chimborazo: ['Riobamba', 'Guano'],
-    Esmeraldas: ['Esmeraldas', 'Atacames'],
-  },
-};
+const PAIS_POR_DEFECTO = 'Colombia';
+
+const ordenarEs = (a: string, b: string): number => a.localeCompare(b, 'es');
+
+// Busca el indicativo cuyo nombrePais coincide (sin distinguir mayúsculas ni tildes)
+const buscarIndicativoPorPais = (
+  lista: IndicativoItem[],
+  pais: string
+): string | undefined =>
+  lista.find(
+    (item) => item.nombrePais.trim().localeCompare(pais.trim(), 'es', { sensitivity: 'base' }) === 0
+  )?.indicativo;
 
 export default function Register() {
   const navigate = useNavigate();
 
   const [tiposIdentificacion, setTiposIdentificacion] = useState<CatalogoItem[]>([]);
+  const [ubicaciones, setUbicaciones] = useState<UbicacionesMap>({});
+  const [indicativos, setIndicativos] = useState<IndicativoItem[]>([]);
 
   const [formData, setFormData] = useState<RegisterFormData>({
     tipoIdentificacion: '',
@@ -144,7 +68,7 @@ export default function Register() {
     primerApellido: '',
     segundoApellido: '',
     fechaNacimiento: '',
-    pais: 'Colombia',
+    pais: PAIS_POR_DEFECTO,
     departamento: '',
     ciudad: '',
     direccion: '',
@@ -157,27 +81,50 @@ export default function Register() {
   useEffect(() => {
     let activo = true;
 
-    const cargarTiposIdentificacion = async () => {
+    const cargarCatalogos = async () => {
       try {
-        const res = await fetch(`${API_CATALOGOS_URL}/tipos-identificacion`);
-        if (!res.ok) return;
+        const [tiposRes, ubicacionesRes, indicativosRes] = await Promise.all([
+          fetch(`${API_CATALOGOS_URL}/tipos-identificacion`),
+          fetch(`${API_CATALOGOS_URL}/ubicaciones/no-europa`),
+          fetch(`${API_CATALOGOS_URL}/indicativos/no-europa`),
+        ]);
 
-        const data: CatalogoItem[] = await res.json();
-        if (activo) {
-          setTiposIdentificacion(data);
-          if (data.length > 0) {
-            setFormData((prev) => ({
-              ...prev,
-              tipoIdentificacion: prev.tipoIdentificacion || data[0].nombre,
-            }));
-          }
-        }
+        const tiposData: CatalogoItem[] = tiposRes.ok ? await tiposRes.json() : [];
+        const ubicacionesData: UbicacionesMap = ubicacionesRes.ok ? await ubicacionesRes.json() : {};
+        const indicativosData: IndicativoItem[] = indicativosRes.ok
+          ? await indicativosRes.json()
+          : [];
+
+        if (!activo) return;
+
+        setTiposIdentificacion(tiposData);
+        setUbicaciones(ubicacionesData);
+        setIndicativos(indicativosData);
+
+        const paisesCatalogo = Object.keys(ubicacionesData).sort(ordenarEs);
+
+        setFormData((prev) => {
+          // Mantiene el país actual si existe en el catálogo; si no, usa Colombia o el primero
+          const paisInicial = paisesCatalogo.includes(prev.pais)
+            ? prev.pais
+            : paisesCatalogo.includes(PAIS_POR_DEFECTO)
+              ? PAIS_POR_DEFECTO
+              : (paisesCatalogo[0] ?? prev.pais);
+
+          return {
+            ...prev,
+            tipoIdentificacion:
+              prev.tipoIdentificacion || (tiposData.length > 0 ? tiposData[0].nombre : ''),
+            pais: paisInicial,
+            indicativo: buscarIndicativoPorPais(indicativosData, paisInicial) ?? prev.indicativo,
+          };
+        });
       } catch {
-        // Si falla la red, el select queda vacío sin romper la vista
+        // Si falla la red, los selects quedan vacíos sin romper la vista
       }
     };
 
-    cargarTiposIdentificacion();
+    cargarCatalogos();
 
     return () => {
       activo = false;
@@ -212,6 +159,7 @@ export default function Register() {
           pais: value,
           departamento: '',
           ciudad: '',
+          indicativo: buscarIndicativoPorPais(indicativos, value) ?? prev.indicativo,
         };
       }
 
@@ -315,14 +263,22 @@ export default function Register() {
     }
   };
 
-  const paisesDisponibles = Object.keys(UBICACIONES);
+  const paisesDisponibles = Object.keys(ubicaciones).sort(ordenarEs);
   const departamentosDisponibles = formData.pais
-    ? Object.keys(UBICACIONES[formData.pais] || {})
+    ? Object.keys(ubicaciones[formData.pais] ?? {}).sort(ordenarEs)
     : [];
   const ciudadesDisponibles =
     formData.pais && formData.departamento
-      ? UBICACIONES[formData.pais]?.[formData.departamento] || []
+      ? [...(ubicaciones[formData.pais]?.[formData.departamento] ?? [])].sort(ordenarEs)
       : [];
+  const indicativosOrdenados = [...indicativos].sort((a, b) =>
+    ordenarEs(a.nombrePais, b.nombrePais)
+  );
+
+  // Opción de respaldo: evita que el indicativo quede en blanco mientras carga el catálogo
+  const indicativoFueraDeCatalogo =
+    Boolean(formData.indicativo) &&
+    !indicativosOrdenados.some((item) => item.indicativo === formData.indicativo);
 
   const hoy = new Date();
   const limiteNacimiento = new Date(
@@ -467,6 +423,7 @@ export default function Register() {
                   onChange={handleChange}
                   required
                 >
+                  <option value="">Selecciona un país</option>
                   {paisesDisponibles.map((pais) => (
                     <option key={pais} value={pais}>
                       {pais}
@@ -537,14 +494,14 @@ export default function Register() {
                   onChange={handleChange}
                   className={styles.indicativoSelect}
                 >
-                  <option value="+57">🇨🇴 +57</option>
-                  <option value="+1">🇺🇸 +1</option>
-                  <option value="+34">🇪🇸 +34</option>
-                  <option value="+52">🇲🇽 +52</option>
-                  <option value="+54">🇦🇷 +54</option>
-                  <option value="+56">🇨🇱 +56</option>
-                  <option value="+51">🇵🇪 +51</option>
-                  <option value="+593">🇪🇨 +593</option>
+                  {indicativosOrdenados.map((item) => (
+                    <option key={item.idPais} value={item.indicativo}>
+                      {item.nombrePais} ({item.indicativo})
+                    </option>
+                  ))}
+                  {indicativoFueraDeCatalogo && (
+                    <option value={formData.indicativo}>{formData.indicativo}</option>
+                  )}
                 </select>
                 <input
                   type="tel"

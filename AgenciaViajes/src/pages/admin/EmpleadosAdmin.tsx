@@ -10,104 +10,15 @@ import type {
 
 const API_BASE = 'http://localhost:8080/api';
 
-const UBICACIONES: Record<string, Record<string, string[]>> = {
-  Colombia: {
-    Antioquia: ['Medellín', 'Envigado'],
-    Atlántico: ['Barranquilla', 'Soledad'],
-    'Bogotá D.C.': ['Bogotá', 'Usaquén'],
-    Bolívar: ['Cartagena', 'Magangué'],
-    Boyacá: ['Tunja', 'Duitama'],
-    Caldas: ['Manizales', 'Villamaría'],
-    Cundinamarca: ['Soacha', 'Chía'],
-    Quindío: ['Armenia', 'Calarcá'],
-    Risaralda: ['Pereira', 'Dosquebradas'],
-    'Valle del Cauca': ['Cali', 'Palmira'],
-  },
-  'Estados Unidos': {
-    California: ['Los Ángeles', 'San Francisco'],
-    Texas: ['Houston', 'Austin'],
-    Florida: ['Miami', 'Orlando'],
-    'Nueva York': ['Nueva York', 'Búfalo'],
-    Illinois: ['Chicago', 'Aurora'],
-    Pensilvania: ['Filadelfia', 'Pittsburgh'],
-    Ohio: ['Columbus', 'Cleveland'],
-    Georgia: ['Atlanta', 'Savannah'],
-    'Carolina del Norte': ['Charlotte', 'Raleigh'],
-    Míchigan: ['Detroit', 'Grand Rapids'],
-  },
-  España: {
-    Andalucía: ['Sevilla', 'Málaga'],
-    Cataluña: ['Barcelona', 'Girona'],
-    'Comunidad de Madrid': ['Madrid', 'Alcalá de Henares'],
-    'Comunidad Valenciana': ['Valencia', 'Alicante'],
-    Galicia: ['Vigo', 'A Coruña'],
-    'Castilla y León': ['Valladolid', 'Salamanca'],
-    'País Vasco': ['Bilbao', 'San Sebastián'],
-    Canarias: ['Las Palmas', 'Santa Cruz de Tenerife'],
-    'Castilla-La Mancha': ['Toledo', 'Albacete'],
-    Aragón: ['Zaragoza', 'Huesca'],
-  },
-  México: {
-    'Ciudad de México': ['Ciudad de México', 'Coyoacán'],
-    Jalisco: ['Guadalajara', 'Zapopan'],
-    'Nuevo León': ['Monterrey', 'San Pedro Garza García'],
-    Puebla: ['Puebla', 'Tehuacán'],
-    Guanajuato: ['León', 'Irapuato'],
-    'Estado de México': ['Toluca', 'Ecatepec'],
-    Veracruz: ['Veracruz', 'Xalapa'],
-    Yucatán: ['Mérida', 'Valladolid'],
-    'Quintana Roo': ['Cancún', 'Playa del Carmen'],
-    'Baja California': ['Tijuana', 'Mexicali'],
-  },
-  Argentina: {
-    'Buenos Aires': ['La Plata', 'Mar del Plata'],
-    'Ciudad Autónoma de Buenos Aires': ['Buenos Aires', 'Palermo'],
-    Córdoba: ['Córdoba', 'Villa Carlos Paz'],
-    'Santa Fe': ['Rosario', 'Santa Fe'],
-    Mendoza: ['Mendoza', 'San Rafael'],
-    Tucumán: ['San Miguel de Tucumán', 'Yerba Buena'],
-    Salta: ['Salta', 'San Ramón de la Nueva Orán'],
-    'Entre Ríos': ['Paraná', 'Concordia'],
-    Misiones: ['Posadas', 'Puerto Iguazú'],
-    Chaco: ['Resistencia', 'Presidencia Roque Sáenz Peña'],
-  },
-  Chile: {
-    'Región Metropolitana': ['Santiago', 'Puente Alto'],
-    Valparaíso: ['Valparaíso', 'Viña del Mar'],
-    Biobío: ['Concepción', 'Talcahuano'],
-    'La Araucanía': ['Temuco', 'Villarrica'],
-    'Los Lagos': ['Puerto Montt', 'Osorno'],
-    Antofagasta: ['Antofagasta', 'Calama'],
-    Coquimbo: ['La Serena', 'Coquimbo'],
-    "O'Higgins": ['Rancagua', 'San Fernando'],
-    Maule: ['Talca', 'Curicó'],
-    Tarapacá: ['Iquique', 'Alto Hospicio'],
-  },
-  Perú: {
-    Lima: ['Lima', 'Miraflores'],
-    Arequipa: ['Arequipa', 'Camaná'],
-    'La Libertad': ['Trujillo', 'Chepén'],
-    Piura: ['Piura', 'Sullana'],
-    Lambayeque: ['Chiclayo', 'Lambayeque'],
-    Cusco: ['Cusco', 'Urubamba'],
-    Junín: ['Huancayo', 'Tarma'],
-    Áncash: ['Chimbote', 'Huaraz'],
-    Loreto: ['Iquitos', 'Yurimaguas'],
-    Ica: ['Ica', 'Chincha Alta'],
-  },
-  Ecuador: {
-    Pichincha: ['Quito', 'Sangolquí'],
-    Guayas: ['Guayaquil', 'Durán'],
-    Azuay: ['Cuenca', 'Gualaceo'],
-    Manabí: ['Portoviejo', 'Manta'],
-    'El Oro': ['Machala', 'Pasaje'],
-    Tungurahua: ['Ambato', 'Baños'],
-    Loja: ['Loja', 'Catamayo'],
-    Imbabura: ['Ibarra', 'Otavalo'],
-    Chimborazo: ['Riobamba', 'Guano'],
-    Esmeraldas: ['Esmeraldas', 'Atacames'],
-  },
-};
+type UbicacionesMap = Record<string, Record<string, string[]>>;
+
+interface IndicativoItem {
+  idPais: number;
+  nombrePais: string;
+  indicativo: string;
+}
+
+const ordenarEs = (a: string, b: string): number => a.localeCompare(b, 'es');
 
 interface EmpleadoFormState {
   tipoIdentificacion: string;
@@ -161,6 +72,8 @@ export default function EmpleadosAdmin() {
   const [cargos, setCargos] = useState<CatalogoItem[]>([]);
   const [roles, setRoles] = useState<CatalogoItem[]>([]);
   const [tiposIdentificacion, setTiposIdentificacion] = useState<CatalogoItem[]>([]);
+  const [ubicaciones, setUbicaciones] = useState<UbicacionesMap>({});
+  const [indicativos, setIndicativos] = useState<IndicativoItem[]>([]);
 
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -185,13 +98,16 @@ export default function EmpleadosAdmin() {
 
     const cargarDatosIniciales = async () => {
       try {
-        const [empRes, sedesRes, cargosRes, rolesRes, tiposIdRes] = await Promise.all([
-          fetch(`${API_BASE}/empleados`),
-          fetch(`${API_BASE}/sedes`),
-          fetch(`${API_BASE}/catalogos/cargos`),
-          fetch(`${API_BASE}/catalogos/roles`),
-          fetch(`${API_BASE}/catalogos/tipos-identificacion`),
-        ]);
+        const [empRes, sedesRes, cargosRes, rolesRes, tiposIdRes, ubicacionesRes, indicativosRes] =
+          await Promise.all([
+            fetch(`${API_BASE}/empleados`),
+            fetch(`${API_BASE}/sedes`),
+            fetch(`${API_BASE}/catalogos/cargos`),
+            fetch(`${API_BASE}/catalogos/roles`),
+            fetch(`${API_BASE}/catalogos/tipos-identificacion`),
+            fetch(`${API_BASE}/catalogos/ubicaciones/no-europa`),
+            fetch(`${API_BASE}/catalogos/indicativos/no-europa`),
+          ]);
 
         if (!empRes.ok) throw new Error('No se pudo cargar la lista de empleados.');
 
@@ -200,6 +116,8 @@ export default function EmpleadosAdmin() {
         const cargosData: CatalogoItem[] = cargosRes.ok ? await cargosRes.json() : [];
         const rolesRaw: CatalogoItem[] = rolesRes.ok ? await rolesRes.json() : [];
         const tiposIdData: CatalogoItem[] = tiposIdRes.ok ? await tiposIdRes.json() : [];
+        const ubicacionesData: UbicacionesMap = ubicacionesRes.ok ? await ubicacionesRes.json() : {};
+        const indicativosData: IndicativoItem[] = indicativosRes.ok ? await indicativosRes.json() : [];
         const tiposIdFiltrados = tiposIdData.filter(
           (tipo) => tipo.nombre.trim().toUpperCase() !== 'TI'
         );
@@ -215,6 +133,8 @@ export default function EmpleadosAdmin() {
           setCargos(cargosData);
           setRoles(rolesEmpleado);
           setTiposIdentificacion(tiposIdFiltrados);
+          setUbicaciones(ubicacionesData);
+          setIndicativos(indicativosData);
         }
       } catch (err) {
         if (activo) {
@@ -264,6 +184,13 @@ export default function EmpleadosAdmin() {
     }
   };
 
+  // Busca el indicativo del catálogo cuyo nombrePais coincide (sin distinguir mayúsculas ni tildes)
+  const buscarIndicativoPorPais = (pais: string): string | undefined =>
+    indicativos.find(
+      (item) =>
+        item.nombrePais.trim().localeCompare(pais.trim(), 'es', { sensitivity: 'base' }) === 0
+    )?.indicativo;
+
   const abrirModalCrear = () => {
     setEditingId(null);
     setModalError(null);
@@ -272,12 +199,21 @@ export default function EmpleadosAdmin() {
       roles[0]?.nombre ??
       '';
 
+    const paisesCatalogo = Object.keys(ubicaciones).sort(ordenarEs);
+    const paisPorDefecto = paisesCatalogo.includes(INITIAL_FORM.pais)
+      ? INITIAL_FORM.pais
+      : (paisesCatalogo[0] ?? '');
+    const indicativoPorDefecto =
+      buscarIndicativoPorPais(paisPorDefecto) ?? INITIAL_FORM.indicativo;
+
     setForm({
       ...INITIAL_FORM,
       tipoIdentificacion: tiposIdentificacion[0]?.nombre ?? 'CC',
       rol: rolPorDefecto,
       idCargo: cargos[0] ? String(cargos[0].id) : '',
       idSede: sedes[0] ? String(sedes[0].idSede) : '',
+      pais: paisPorDefecto,
+      indicativo: indicativoPorDefecto,
     });
     setIsModalOpen(true);
   };
@@ -332,6 +268,7 @@ export default function EmpleadosAdmin() {
           pais: value,
           departamento: '',
           ciudad: '',
+          indicativo: buscarIndicativoPorPais(value) ?? prev.indicativo,
         };
       }
 
@@ -500,14 +437,26 @@ export default function EmpleadosAdmin() {
     return true;
   });
 
-  const paisesDisponibles = Object.keys(UBICACIONES);
+  const paisesDisponibles = Object.keys(ubicaciones).sort(ordenarEs);
   const departamentosDisponibles = form.pais
-    ? Object.keys(UBICACIONES[form.pais] || {})
+    ? Object.keys(ubicaciones[form.pais] ?? {}).sort(ordenarEs)
     : [];
   const ciudadesDisponibles =
     form.pais && form.departamento
-      ? UBICACIONES[form.pais]?.[form.departamento] || []
+      ? [...(ubicaciones[form.pais]?.[form.departamento] ?? [])].sort(ordenarEs)
       : [];
+  const indicativosOrdenados = [...indicativos].sort((a, b) =>
+    ordenarEs(a.nombrePais, b.nombrePais)
+  );
+
+  // Opciones de respaldo: conservan el valor guardado si no aparece en los catálogos
+  const paisFueraDeCatalogo = Boolean(form.pais) && !paisesDisponibles.includes(form.pais);
+  const departamentoFueraDeCatalogo =
+    Boolean(form.departamento) && !departamentosDisponibles.includes(form.departamento);
+  const ciudadFueraDeCatalogo = Boolean(form.ciudad) && !ciudadesDisponibles.includes(form.ciudad);
+  const indicativoFueraDeCatalogo =
+    Boolean(form.indicativo) &&
+    !indicativosOrdenados.some((item) => item.indicativo === form.indicativo);
 
   const hoy = new Date();
   const fechaMaximaNacimiento = new Date(
@@ -896,11 +845,13 @@ export default function EmpleadosAdmin() {
                     onChange={handleChange}
                     required
                   >
+                    <option value="">Selecciona un país</option>
                     {paisesDisponibles.map((pais) => (
                       <option key={pais} value={pais}>
                         {pais}
                       </option>
                     ))}
+                    {paisFueraDeCatalogo && <option value={form.pais}>{form.pais}</option>}
                   </select>
                 </div>
 
@@ -920,6 +871,9 @@ export default function EmpleadosAdmin() {
                         {depto}
                       </option>
                     ))}
+                    {departamentoFueraDeCatalogo && (
+                      <option value={form.departamento}>{form.departamento}</option>
+                    )}
                   </select>
                 </div>
 
@@ -939,6 +893,7 @@ export default function EmpleadosAdmin() {
                         {ciudad}
                       </option>
                     ))}
+                    {ciudadFueraDeCatalogo && <option value={form.ciudad}>{form.ciudad}</option>}
                   </select>
                 </div>
 
@@ -966,14 +921,14 @@ export default function EmpleadosAdmin() {
                       onChange={handleChange}
                       className={styles.indicativoSelect}
                     >
-                      <option value="+57">🇨🇴 +57</option>
-                      <option value="+1">🇺🇸 +1</option>
-                      <option value="+34">🇪🇸 +34</option>
-                      <option value="+52">🇲🇽 +52</option>
-                      <option value="+54">🇦🇷 +54</option>
-                      <option value="+56">🇨🇱 +56</option>
-                      <option value="+51">🇵🇪 +51</option>
-                      <option value="+593">🇪🇨 +593</option>
+                      {indicativosOrdenados.map((item) => (
+                        <option key={item.idPais} value={item.indicativo}>
+                          {item.nombrePais} ({item.indicativo})
+                        </option>
+                      ))}
+                      {indicativoFueraDeCatalogo && (
+                        <option value={form.indicativo}>{form.indicativo}</option>
+                      )}
                     </select>
                     <input
                       type="tel"

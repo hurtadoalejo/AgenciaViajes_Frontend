@@ -135,3 +135,132 @@ export interface PlanPayload {
   incluyeCheckIn: boolean;
   precioExtra: number;
 }
+
+export interface VentaMensualItem {
+  periodo: string;
+  cantidadVentas: number;
+  totalVendido: number;
+}
+
+export interface IngresoMetodoPagoItem {
+  metodoPago: string;
+  cantidadPagos: number;
+  totalIngresos: number;
+  porcentaje: number;
+}
+
+export interface ReservasEmpleadoItem {
+  idEmpleado: number;
+  nombreEmpleado: string;
+  cargo: string;
+  sede: string;
+  cantidadReservas: number;
+  totalVendido: number;
+}
+
+export interface RutaPasajerosItem {
+  idRuta: number;
+  origen: string;
+  destino: string;
+  tipoTransporte: string;
+  reservas: number;
+  pasajeros: number;
+  promedioCategoria: number | null;
+}
+
+export interface ClienteGastoItem {
+  idCliente: number;
+  nombreCliente: string;
+  correo: string;
+  cantidadReservas: number;
+  totalGastado: number;
+  promedioClientes: number;
+}
+
+export interface SedeItem {
+  idSede: number;
+  nombreSede: string;
+  direccion: string;
+  pais: string;
+  departamento: string;
+  ciudad: string;
+  idCiudad: number;
+}
+
+export interface SedePayload {
+  nombreSede: string;
+  direccion: string;
+  pais: string;
+  departamento: string;
+  ciudad: string;
+}
+
+export type UbicacionesMap = Record<string, Record<string, string[]>>;
+
+export interface RutaItem {
+  idRuta: number;
+  idCiudadOrigen: number;
+  ciudadOrigen: string;
+  direccionOrigen: string | null;
+  idCiudadDestino: number;
+  ciudadDestino: string;
+  direccionDestino: string | null;
+  distancia: number;
+  duracionEstimada: number;
+  precioBase: number;
+  idVehiculo: number | null;
+  codigoVehiculo: string | null;
+  tipoTransporte: string | null;
+}
+
+export interface RutaPayload {
+  idCiudadOrigen: number;
+  direccionOrigen: string;
+  idCiudadDestino: number;
+  direccionDestino: string;
+  distancia: number;
+  duracionEstimada: number;
+  precioBase: number;
+  idVehiculo: number;
+}
+
+export interface VehiculoOption {
+  idVehiculo: number;
+  codigoIdentificacion: string;
+  tipoTransporte: string;
+  capacidad: number;
+}
+
+export interface CatalogoOption {
+  id: number;
+  nombre: string;
+}
+
+export interface ProgramacionItem {
+  idProgramacionViaje: number;
+  idRuta: number;
+  ciudadOrigen: string;
+  ciudadDestino: string;
+  fechaHoraSalida: string;
+  fechaHoraLlegada: string;
+  tipoTransporte: string | null;
+  codigoVehiculo: string | null;
+}
+
+export interface ProgramacionPayload {
+  idRuta: number;
+  fechaHoraSalida: string;
+}
+
+export interface ProgramacionRecurrentePayload {
+  idRuta: number;
+  fechaHoraInicio: string;
+  fechaHoraFin: string;
+  cadaHoras: number;
+}
+
+export interface ProgramacionRecurrenteResult {
+  creadas: number;
+  omitidas: number;
+  salidas: ProgramacionItem[];
+}

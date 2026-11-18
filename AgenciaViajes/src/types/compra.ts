@@ -139,3 +139,14 @@ export interface ClienteBusqueda {
   segundoApellido: string | null;
   correo: string;
 }
+
+/** Oferta vigente que le llegó al cliente por notificación (GET /api/clientes/{id}/cupones). */
+export interface Cupon {
+  idOferta: number;
+  titulo: string;
+  descripcion: string | null;
+  porcentajeDescuento: number;
+  fechaInicio: string;
+  fechaFin: string;
+  fechaNotificacion: string | null;
+}

@@ -65,20 +65,29 @@ const pasajeroDesde = (c: ClienteBusqueda | ClientePerfil, idPlan: number | ''):
 
 const esperar = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-/** Algoritmo de Luhn: valida el número de tarjeta sin enviarlo a ningún lado. */
+/** Pasarela simulada: cualquier número de 16 dígitos sirve (no se envía a ningún lado). */
 function tarjetaValida(numero: string): boolean {
-  const digitos = numero.replace(/\D/g, '');
-  if (digitos.length < 13 || digitos.length > 19) return false;
-  let suma = 0;
-  for (let i = 0; i < digitos.length; i++) {
-    let d = Number(digitos[digitos.length - 1 - i]);
-    if (i % 2 === 1) {
-      d *= 2;
-      if (d > 9) d -= 9;
-    }
-    suma += d;
+  return /^\d{16}$/.test(numero.replace(/\s/g, ''));
+}
+
+/**
+ * Vencimiento MM/AA: pone el "/" solo al escribir el mes (ej. "12" -> "12/"; "4" -> "04/").
+ * Al borrar no lo vuelve a poner, para que se pueda corregir el mes.
+ */
+function formatearVencimiento(nuevo: string, anterior: string): string {
+  let digitos = nuevo.replace(/\D/g, '').slice(0, 4);
+  const borrando = nuevo.length < anterior.length;
+  if (!borrando && digitos.length === 1 && Number(digitos) > 1) {
+    digitos = `0${digitos}`;
   }
-  return suma % 10 === 0;
+  if (digitos.length > 2) return `${digitos.slice(0, 2)}/${digitos.slice(2)}`;
+  if (digitos.length === 2 && !borrando) return `${digitos}/`;
+  return digitos;
+}
+
+/** Número de tarjeta: solo números, máximo 16, en grupos de 4 ("1234 5678 9012 3456"). */
+function formatearTarjeta(texto: string): string {
+  return texto.replace(/\D/g, '').slice(0, 16).replace(/(\d{4})(?=\d)/g, '$1 ');
 }
 
 function vencimientoValido(texto: string): boolean {
@@ -303,7 +312,7 @@ function FlujoReserva({ compra, user }: { compra: CompraEnCurso; user: AuthUser 
   const validarPago = (): string | null => {
     if (!reserva) return 'No hay reserva para pagar.';
     if (metodo === 'TARJETA_CREDITO' || metodo === 'TARJETA_DEBITO') {
-      if (!tarjetaValida(tarjeta.numero)) return 'El número de tarjeta no es válido (prueba con 4111 1111 1111 1111).';
+      if (!tarjetaValida(tarjeta.numero)) return 'El número de tarjeta debe tener 16 dígitos.';
       if (!tarjeta.titular.trim()) return 'Escribe el nombre del titular como aparece en la tarjeta.';
       if (!vencimientoValido(tarjeta.vencimiento)) return 'La fecha de vencimiento debe tener el formato MM/AA y no estar vencida.';
       if (!/^\d{3,4}$/.test(tarjeta.cvv)) return 'El CVV debe tener 3 o 4 dígitos.';
@@ -676,10 +685,10 @@ function FlujoReserva({ compra, user }: { compra: CompraEnCurso; user: AuthUser 
                           id="numero"
                           className={styles.input}
                           inputMode="numeric"
-                          placeholder="4111 1111 1111 1111"
-                          maxLength={23}
+                          placeholder="1234 5678 9012 3456"
+                          maxLength={19}
                           value={tarjeta.numero}
-                          onChange={(e) => setTarjeta({ ...tarjeta, numero: e.target.value })}
+                          onChange={(e) => setTarjeta({ ...tarjeta, numero: formatearTarjeta(e.target.value) })}
                         />
                       </div>
                       <div className={styles.field} style={{ gridColumn: '1 / -1' }}>
@@ -700,7 +709,10 @@ function FlujoReserva({ compra, user }: { compra: CompraEnCurso; user: AuthUser 
                           placeholder="MM/AA"
                           maxLength={5}
                           value={tarjeta.vencimiento}
-                          onChange={(e) => setTarjeta({ ...tarjeta, vencimiento: e.target.value })}
+                          inputMode="numeric"
+                          onChange={(e) =>
+                            setTarjeta({ ...tarjeta, vencimiento: formatearVencimiento(e.target.value, tarjeta.vencimiento) })
+                          }
                         />
                       </div>
                       <div className={styles.field}>
@@ -711,7 +723,7 @@ function FlujoReserva({ compra, user }: { compra: CompraEnCurso; user: AuthUser 
                           inputMode="numeric"
                           maxLength={4}
                           value={tarjeta.cvv}
-                          onChange={(e) => setTarjeta({ ...tarjeta, cvv: e.target.value })}
+                          onChange={(e) => setTarjeta({ ...tarjeta, cvv: e.target.value.replace(/\D/g, '').slice(0, 4) })}
                         />
                       </div>
                       {metodo === 'TARJETA_CREDITO' && (

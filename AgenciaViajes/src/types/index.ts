@@ -262,5 +262,7 @@ export interface ProgramacionRecurrentePayload {
 export interface ProgramacionRecurrenteResult {
   creadas: number;
   omitidas: number;
+  /** Salidas no creadas porque el vehículo no tenía 12 horas de descanso con otro viaje. */
+  conflictos: number;
   salidas: ProgramacionItem[];
 }

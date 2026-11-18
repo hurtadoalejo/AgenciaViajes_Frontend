@@ -4,6 +4,8 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
+import Resultados from './pages/Resultados';
+import Reserva from './pages/Reserva';
 import AdminRoute from './components/Admin/AdminRoute';
 import AdminLayout from './pages/admin/AdminLayout';
 import EmpleadosAdmin from './pages/admin/EmpleadosAdmin';
@@ -24,6 +26,8 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/registro" element={<Register />} />
           <Route path="/perfil" element={<Profile />} />
+          <Route path="/viajes" element={<Resultados />} />
+          <Route path="/reserva" element={<Reserva />} />
           <Route element={<AdminRoute />}>
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<Navigate to="empleados" replace />} />

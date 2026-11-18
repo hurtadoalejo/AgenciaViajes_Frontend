@@ -569,7 +569,7 @@ export default function ProgramacionAdmin() {
       sincronizarVistaConRuta(idRuta, formRecurrente.fechaHoraInicio);
       setFeedback({
         type: 'success',
-        text: `Programación generada: ${resultado.creadas} salida(s) creada(s) y ${resultado.omitidas} omitida(s) por duplicidad.`,
+        text: `Programación generada: ${resultado.creadas} salida(s) creada(s), ${resultado.omitidas} omitida(s) porque ya existían y ${resultado.conflictos ?? 0} sin crear porque el vehículo no tenía 12 horas de descanso.`,
       });
     } catch {
       setModalError('No se pudo conectar con el servidor. Verifica tu conexión.');

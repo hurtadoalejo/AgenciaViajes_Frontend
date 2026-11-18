@@ -65,20 +65,9 @@ const pasajeroDesde = (c: ClienteBusqueda | ClientePerfil, idPlan: number | ''):
 
 const esperar = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-/** Algoritmo de Luhn: valida el número de tarjeta sin enviarlo a ningún lado. */
+/** Pasarela simulada: cualquier número de 16 dígitos sirve (no se envía a ningún lado). */
 function tarjetaValida(numero: string): boolean {
-  const digitos = numero.replace(/\D/g, '');
-  if (digitos.length < 13 || digitos.length > 19) return false;
-  let suma = 0;
-  for (let i = 0; i < digitos.length; i++) {
-    let d = Number(digitos[digitos.length - 1 - i]);
-    if (i % 2 === 1) {
-      d *= 2;
-      if (d > 9) d -= 9;
-    }
-    suma += d;
-  }
-  return suma % 10 === 0;
+  return /^\d{16}$/.test(numero.replace(/\s/g, ''));
 }
 
 /**
@@ -96,9 +85,9 @@ function formatearVencimiento(nuevo: string, anterior: string): string {
   return digitos;
 }
 
-/** Número de tarjeta en grupos de 4: "4111 1111 1111 1111". */
+/** Número de tarjeta: solo números, máximo 16, en grupos de 4 ("1234 5678 9012 3456"). */
 function formatearTarjeta(texto: string): string {
-  return texto.replace(/\D/g, '').slice(0, 19).replace(/(\d{4})(?=\d)/g, '$1 ');
+  return texto.replace(/\D/g, '').slice(0, 16).replace(/(\d{4})(?=\d)/g, '$1 ');
 }
 
 function vencimientoValido(texto: string): boolean {
@@ -323,7 +312,7 @@ function FlujoReserva({ compra, user }: { compra: CompraEnCurso; user: AuthUser 
   const validarPago = (): string | null => {
     if (!reserva) return 'No hay reserva para pagar.';
     if (metodo === 'TARJETA_CREDITO' || metodo === 'TARJETA_DEBITO') {
-      if (!tarjetaValida(tarjeta.numero)) return 'El número de tarjeta no es válido (prueba con 4111 1111 1111 1111).';
+      if (!tarjetaValida(tarjeta.numero)) return 'El número de tarjeta debe tener 16 dígitos.';
       if (!tarjeta.titular.trim()) return 'Escribe el nombre del titular como aparece en la tarjeta.';
       if (!vencimientoValido(tarjeta.vencimiento)) return 'La fecha de vencimiento debe tener el formato MM/AA y no estar vencida.';
       if (!/^\d{3,4}$/.test(tarjeta.cvv)) return 'El CVV debe tener 3 o 4 dígitos.';
@@ -696,8 +685,8 @@ function FlujoReserva({ compra, user }: { compra: CompraEnCurso; user: AuthUser 
                           id="numero"
                           className={styles.input}
                           inputMode="numeric"
-                          placeholder="4111 1111 1111 1111"
-                          maxLength={23}
+                          placeholder="1234 5678 9012 3456"
+                          maxLength={19}
                           value={tarjeta.numero}
                           onChange={(e) => setTarjeta({ ...tarjeta, numero: formatearTarjeta(e.target.value) })}
                         />

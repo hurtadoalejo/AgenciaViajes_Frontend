@@ -81,6 +81,26 @@ function tarjetaValida(numero: string): boolean {
   return suma % 10 === 0;
 }
 
+/**
+ * Vencimiento MM/AA: pone el "/" solo al escribir el mes (ej. "12" -> "12/"; "4" -> "04/").
+ * Al borrar no lo vuelve a poner, para que se pueda corregir el mes.
+ */
+function formatearVencimiento(nuevo: string, anterior: string): string {
+  let digitos = nuevo.replace(/\D/g, '').slice(0, 4);
+  const borrando = nuevo.length < anterior.length;
+  if (!borrando && digitos.length === 1 && Number(digitos) > 1) {
+    digitos = `0${digitos}`;
+  }
+  if (digitos.length > 2) return `${digitos.slice(0, 2)}/${digitos.slice(2)}`;
+  if (digitos.length === 2 && !borrando) return `${digitos}/`;
+  return digitos;
+}
+
+/** Número de tarjeta en grupos de 4: "4111 1111 1111 1111". */
+function formatearTarjeta(texto: string): string {
+  return texto.replace(/\D/g, '').slice(0, 19).replace(/(\d{4})(?=\d)/g, '$1 ');
+}
+
 function vencimientoValido(texto: string): boolean {
   const m = /^(\d{2})\/(\d{2})$/.exec(texto.trim());
   if (!m) return false;
@@ -679,7 +699,7 @@ function FlujoReserva({ compra, user }: { compra: CompraEnCurso; user: AuthUser 
                           placeholder="4111 1111 1111 1111"
                           maxLength={23}
                           value={tarjeta.numero}
-                          onChange={(e) => setTarjeta({ ...tarjeta, numero: e.target.value })}
+                          onChange={(e) => setTarjeta({ ...tarjeta, numero: formatearTarjeta(e.target.value) })}
                         />
                       </div>
                       <div className={styles.field} style={{ gridColumn: '1 / -1' }}>
@@ -700,7 +720,10 @@ function FlujoReserva({ compra, user }: { compra: CompraEnCurso; user: AuthUser 
                           placeholder="MM/AA"
                           maxLength={5}
                           value={tarjeta.vencimiento}
-                          onChange={(e) => setTarjeta({ ...tarjeta, vencimiento: e.target.value })}
+                          inputMode="numeric"
+                          onChange={(e) =>
+                            setTarjeta({ ...tarjeta, vencimiento: formatearVencimiento(e.target.value, tarjeta.vencimiento) })
+                          }
                         />
                       </div>
                       <div className={styles.field}>
@@ -711,7 +734,7 @@ function FlujoReserva({ compra, user }: { compra: CompraEnCurso; user: AuthUser 
                           inputMode="numeric"
                           maxLength={4}
                           value={tarjeta.cvv}
-                          onChange={(e) => setTarjeta({ ...tarjeta, cvv: e.target.value })}
+                          onChange={(e) => setTarjeta({ ...tarjeta, cvv: e.target.value.replace(/\D/g, '').slice(0, 4) })}
                         />
                       </div>
                       {metodo === 'TARJETA_CREDITO' && (

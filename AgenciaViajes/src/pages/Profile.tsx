@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import styles from './Profile.module.css';
 import iconVolverAtras from '../assets/iconVolverAtras.png';
 import { useAuth } from '../hooks/useAuth';
+import HistorialCliente from '../components/Perfil/HistorialCliente';
 import type { ClientePerfil, EmpleadoPerfil } from '../types';
 
 const API_CLIENTES = 'http://localhost:8080/api/clientes';
@@ -495,6 +496,8 @@ export default function Profile() {
             </form>
           )}
         </div>
+
+        {perfil && user && !esEmpleado && <HistorialCliente idCliente={user.idUsuario} />}
       </div>
     </div>
   );

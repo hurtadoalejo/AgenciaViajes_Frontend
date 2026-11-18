@@ -7,8 +7,11 @@ import Profile from './pages/Profile';
 import Resultados from './pages/Resultados';
 import Reserva from './pages/Reserva';
 import AdminRoute from './components/Admin/AdminRoute';
+import EmpleadoRoute from './components/Admin/EmpleadoRoute';
+import ClientesEmpleado from './pages/ClientesEmpleado';
 import AdminLayout from './pages/admin/AdminLayout';
 import EmpleadosAdmin from './pages/admin/EmpleadosAdmin';
+import ClientesAdmin from './pages/admin/ClientesAdmin';
 import VehiculosAdmin from './pages/admin/VehiculosAdmin';
 import OfertasAdmin from './pages/admin/OfertasAdmin';
 import PlanesAdmin from './pages/admin/PlanesAdmin';
@@ -28,10 +31,14 @@ export default function App() {
           <Route path="/perfil" element={<Profile />} />
           <Route path="/viajes" element={<Resultados />} />
           <Route path="/reserva" element={<Reserva />} />
+          <Route element={<EmpleadoRoute />}>
+            <Route path="/clientes" element={<ClientesEmpleado />} />
+          </Route>
           <Route element={<AdminRoute />}>
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<Navigate to="empleados" replace />} />
               <Route path="empleados" element={<EmpleadosAdmin />} />
+              <Route path="clientes" element={<ClientesAdmin />} />
               <Route path="vehiculos" element={<VehiculosAdmin />} />
               <Route path="ofertas" element={<OfertasAdmin />} />
               <Route path="planes" element={<PlanesAdmin />} />

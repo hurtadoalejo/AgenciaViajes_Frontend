@@ -57,6 +57,33 @@
   object-fit: contain;
 }
 
+/* Pestañas del empleado (a la izquierda del menú de usuario) */
+.rightGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.navTab {
+  padding: 0.5rem 0.95rem;
+  border-radius: 8px;
+  color: #334155;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.navTab:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.navTabActive {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+}
+
 /* Estilos del usuario logueado */
 .userMenuContainer {
   position: relative;

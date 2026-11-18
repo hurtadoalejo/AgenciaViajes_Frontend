@@ -29,6 +29,14 @@ export interface ClientePerfil {
   rol: string;
 }
 
+/** GET /api/clientes/resumen: cliente con lo que ha gastado (solo pagos aprobados). */
+export interface ClienteResumen {
+  datosPersonales: ClientePerfil;
+  totalGastado: number;
+  comprasPagadas: number;
+  reservas: number;
+}
+
 export interface EmpleadoPerfil {
   datosPersonales: ClientePerfil;
   salario: number;

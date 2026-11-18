@@ -9,6 +9,7 @@ interface AdminMenuItem {
 
 const MENU_ITEMS: AdminMenuItem[] = [
   { path: '/admin/empleados', label: 'Empleados' },
+  { path: '/admin/clientes', label: 'Clientes' },
   { path: '/admin/vehiculos', label: 'Vehículos' },
   { path: '/admin/ofertas', label: 'Ofertas' },
   { path: '/admin/planes', label: 'Planes' },

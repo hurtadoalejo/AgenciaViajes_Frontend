@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import styles from './Navbar.module.css';
 import iconLogin from '../../assets/iconLogin.png';
 import type { TransportMode } from '../../types';
@@ -15,6 +15,7 @@ export default function Navbar({ currentMode = 'avion' }: NavbarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const displayName = user?.nombreCorto || user?.nombre || user?.nombreCompleto || user?.correo || '';
+  const esEmpleado = user?.tipoUsuario === 'EMPLEADO';
 
   const titleStyles: Record<TransportMode, string> = {
     avion: styles.titleAvion,
@@ -52,44 +53,64 @@ export default function Navbar({ currentMode = 'avion' }: NavbarProps) {
           Iniciar sesión
         </Link>
       ) : (
-        <div className={styles.userMenuContainer} ref={dropdownRef}>
-          <button
-            type="button"
-            className={styles.userBtn}
-            onClick={() => setMenuOpen((prev) => !prev)}
-            aria-expanded={menuOpen}
-          >
-            <span className={styles.avatar}>
-              {(displayName || 'U').charAt(0).toUpperCase()}
-            </span>
-            <span className={styles.userName}>{displayName}</span>
-            <span className={styles.chevron}>{menuOpen ? '▲' : '▼'}</span>
-          </button>
-
-          {menuOpen && (
-            <div className={styles.dropdownMenu}>
-              <div className={styles.dropdownHeader}>
-                <span className={styles.dropdownEmail}>{user.correo}</span>
-                <span className={styles.dropdownRole}>{user.rol}</span>
-              </div>
-
-              <Link
-                to="/perfil"
-                className={styles.dropdownItem}
-                onClick={() => setMenuOpen(false)}
-              >
-                Mi perfil
-              </Link>
-
-              <button
-                type="button"
-                className={`${styles.dropdownItem} ${styles.logoutItem}`}
-                onClick={handleLogout}
-              >
-                Cerrar sesión
-              </button>
-            </div>
+        <div className={styles.rightGroup}>
+          {esEmpleado && (
+            <NavLink
+              to="/clientes"
+              className={({ isActive }) => `${styles.navTab} ${isActive ? styles.navTabActive : ''}`}
+            >
+              Clientes
+            </NavLink>
           )}
+          <div className={styles.userMenuContainer} ref={dropdownRef}>
+            <button
+              type="button"
+              className={styles.userBtn}
+              onClick={() => setMenuOpen((prev) => !prev)}
+              aria-expanded={menuOpen}
+            >
+              <span className={styles.avatar}>
+                {(displayName || 'U').charAt(0).toUpperCase()}
+              </span>
+              <span className={styles.userName}>{displayName}</span>
+              <span className={styles.chevron}>{menuOpen ? '▲' : '▼'}</span>
+            </button>
+
+            {menuOpen && (
+              <div className={styles.dropdownMenu}>
+                <div className={styles.dropdownHeader}>
+                  <span className={styles.dropdownEmail}>{user.correo}</span>
+                  <span className={styles.dropdownRole}>{user.rol}</span>
+                </div>
+
+                <Link
+                  to="/perfil"
+                  className={styles.dropdownItem}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Mi perfil
+                </Link>
+
+                {esEmpleado && (
+                  <Link
+                    to="/clientes"
+                    className={styles.dropdownItem}
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Gestionar clientes
+                  </Link>
+                )}
+
+                <button
+                  type="button"
+                  className={`${styles.dropdownItem} ${styles.logoutItem}`}
+                  onClick={handleLogout}
+                >
+                  Cerrar sesión
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </nav>

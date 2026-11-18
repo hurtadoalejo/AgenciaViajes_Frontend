@@ -15,6 +15,11 @@ registerLocale('es', es);
 
 const API_BASE = 'http://localhost:8080/api';
 const ITEMS_POR_PAGINA = 20;
+/**
+ * Los calendarios se dibujan en un contenedor aparte (pegado al <body>) para que el modal
+ * no los recorte ni los aplaste: así la columna de horas queda al lado del mes.
+ */
+const PORTAL_CALENDARIO = 'calendario-portal';
 
 function sumarDias(fechaBase: Date, dias: number): Date {
   const copia = new Date(fechaBase.getFullYear(), fechaBase.getMonth(), fechaBase.getDate());
@@ -103,7 +108,10 @@ export default function ProgramacionAdmin() {
   const [fechaHasta, setFechaHasta] = useState<Date>(() => sumarDias(new Date(), 29));
   const [paginaActual, setPaginaActual] = useState<number>(1);
 
-  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [feedback, setFeedback] = useState<{
+    type: 'success' | 'warning' | 'error';
+    text: string;
+  } | null>(null);
   const [modalError, setModalError] = useState<string | null>(null);
 
   // Modal salida única (crear / editar)
@@ -294,7 +302,9 @@ export default function ProgramacionAdmin() {
             .sort((a, b) => a.fechaHoraSalida.localeCompare(b.fechaHoraSalida));
           setProgramaciones(consolidadas);
           setPaginaActual(1);
-          setFeedback(null);
+          // Solo se limpian errores de carga anteriores: el resultado de crear/generar salidas
+          // debe seguir visible después de recargar la tabla.
+          setFeedback((prev) => (prev?.type === 'error' ? null : prev));
         }
       } catch (err) {
         if (activo) {
@@ -327,7 +337,8 @@ export default function ProgramacionAdmin() {
 
   useEffect(() => {
     if (!feedback) return;
-    const timer = setTimeout(() => setFeedback(null), 4500);
+    // Los avisos (salidas que no se pudieron crear) se quedan más tiempo para alcanzar a leerlos.
+    const timer = setTimeout(() => setFeedback(null), feedback.type === 'success' ? 4500 : 10000);
     return () => clearTimeout(timer);
   }, [feedback]);
 
@@ -564,13 +575,41 @@ export default function ProgramacionAdmin() {
       }
 
       const resultado: ProgramacionRecurrenteResult = await res.json();
+      const conflictos = resultado.conflictos ?? 0;
+      const ruta = rutas.find((r) => r.idRuta === idRuta);
+      const vehiculo = ruta?.codigoVehiculo ? `El vehículo ${ruta.codigoVehiculo}` : 'El vehículo de la ruta';
+      const motivoConflicto = `${vehiculo} ya tiene otros viajes en esas fechas y necesita al menos 12 horas de descanso entre la llegada de un viaje y la siguiente salida.`;
+
+      // No se creó nada: el modal queda abierto con la explicación para que el admin cambie fechas u hora.
+      if (resultado.creadas === 0) {
+        const partes: string[] = [];
+        if (conflictos > 0) {
+          partes.push(
+            `${conflictos} ${conflictos === 1 ? 'salida chocaba' : 'salidas chocaban'} con el descanso del vehículo. ${motivoConflicto}`
+          );
+        }
+        if (resultado.omitidas > 0) {
+          partes.push(
+            `${resultado.omitidas} ${resultado.omitidas === 1 ? 'salida ya existía' : 'salidas ya existían'} en esa ruta y ${resultado.omitidas === 1 ? 'se omitió' : 'se omitieron'}.`
+          );
+        }
+        setModalError(
+          `No se pudo programar ninguna salida. ${partes.join(' ')} Prueba con otra hora, otro rango de fechas o una frecuencia mayor.`
+        );
+        return;
+      }
 
       setIsRecurrenteOpen(false);
       sincronizarVistaConRuta(idRuta, formRecurrente.fechaHoraInicio);
-      setFeedback({
-        type: 'success',
-        text: `Programación generada: ${resultado.creadas} salida(s) creada(s), ${resultado.omitidas} omitida(s) porque ya existían y ${resultado.conflictos ?? 0} sin crear porque el vehículo no tenía 12 horas de descanso.`,
-      });
+
+      let texto = `Programación generada: ${resultado.creadas} ${resultado.creadas === 1 ? 'salida creada' : 'salidas creadas'}.`;
+      if (resultado.omitidas > 0) {
+        texto += ` ${resultado.omitidas} ${resultado.omitidas === 1 ? 'se omitió porque ya existía' : 'se omitieron porque ya existían'}.`;
+      }
+      if (conflictos > 0) {
+        texto += ` ${conflictos} no ${conflictos === 1 ? 'se pudo crear' : 'se pudieron crear'}. ${motivoConflicto}`;
+      }
+      setFeedback({ type: conflictos > 0 ? 'warning' : 'success', text: texto });
     } catch {
       setModalError('No se pudo conectar con el servidor. Verifica tu conexión.');
     } finally {
@@ -722,6 +761,7 @@ export default function ProgramacionAdmin() {
               onChange={handleCambioFechaDesde}
               dateFormat="yyyy-MM-dd"
               popperPlacement="bottom-start"
+                    portalId={PORTAL_CALENDARIO}
               wrapperClassName={styles.datePickerWrapper}
             />
           </div>
@@ -737,6 +777,7 @@ export default function ProgramacionAdmin() {
               maxDate={sumarDias(fechaDesde, 29)}
               dateFormat="yyyy-MM-dd"
               popperPlacement="bottom-start"
+                    portalId={PORTAL_CALENDARIO}
               wrapperClassName={styles.datePickerWrapper}
             />
           </div>
@@ -797,7 +838,16 @@ export default function ProgramacionAdmin() {
       </div>
 
       {feedback && (
-        <div className={feedback.type === 'error' ? styles.alertError : styles.alertSuccess}>
+        <div
+          role={feedback.type === 'success' ? 'status' : 'alert'}
+          className={
+            feedback.type === 'error'
+              ? styles.alertError
+              : feedback.type === 'warning'
+                ? styles.alertWarning
+                : styles.alertSuccess
+          }
+        >
           {feedback.text}
         </div>
       )}
@@ -956,6 +1006,7 @@ export default function ProgramacionAdmin() {
                     dateFormat="yyyy-MM-dd HH:mm"
                     placeholderText="Selecciona fecha y hora futura"
                     popperPlacement="bottom-start"
+                    portalId={PORTAL_CALENDARIO}
                     wrapperClassName={styles.datePickerWrapper}
                     required
                   />
@@ -1052,6 +1103,7 @@ export default function ProgramacionAdmin() {
                     dateFormat="yyyy-MM-dd HH:mm"
                     placeholderText="Inicio"
                     popperPlacement="bottom-start"
+                    portalId={PORTAL_CALENDARIO}
                     wrapperClassName={styles.datePickerWrapper}
                     required
                   />
@@ -1074,6 +1126,7 @@ export default function ProgramacionAdmin() {
                     dateFormat="yyyy-MM-dd HH:mm"
                     placeholderText="Límite"
                     popperPlacement="bottom-start"
+                    portalId={PORTAL_CALENDARIO}
                     wrapperClassName={styles.datePickerWrapper}
                     required
                   />

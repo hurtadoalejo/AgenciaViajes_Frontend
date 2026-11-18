@@ -230,6 +230,15 @@
   font-weight: 500;
 }
 
+.alertWarning {
+  background-color: #fef3c7;
+  color: #92400e;
+  padding: 0.9rem 1.25rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
 .modalBackdrop {
   position: fixed;
   inset: 0;
@@ -454,4 +463,9 @@
   left: 0;
   width: 0;
   height: 0;
+}
+
+/* Calendarios de Programación: se dibujan fuera del modal (portalId) y deben quedar por encima del fondo oscuro. */
+:global(#calendario-portal .react-datepicker-popper) {
+  z-index: 1100;
 }

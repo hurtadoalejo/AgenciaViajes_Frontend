@@ -113,8 +113,11 @@ export interface ReservaCreada {
     fechaHoraLlegada: string;
     precioBase: number;
   }[];
+  /** Un registro por pasajero y por viaje (ida y regreso = dos registros por pasajero). */
   pasajeros: {
     idDetalle: number;
+    idProgramacionViaje: number;
+    tipoTrayecto: string;
     tipoIdentificacion: string;
     numeroIdentificacion: string;
     nombreCompleto: string;
@@ -140,7 +143,7 @@ export interface ClienteBusqueda {
   correo: string;
 }
 
-/** Oferta vigente que le llegó al cliente por notificación (GET /api/clientes/{id}/cupones). */
+/** Oferta vigente que el cliente todavía no ha usado (GET /api/clientes/{id}/ofertas). */
 export interface Cupon {
   idOferta: number;
   titulo: string;

@@ -4,9 +4,10 @@ import styles from './Compra.module.css';
 import Navbar from '../components/Layout/Navbar';
 import iconVolverAtras from '../assets/iconVolverAtras.png';
 import { useAuth } from '../hooks/useAuth';
-import type { AuthUser, CatalogoItem, ClientePerfil, OfertaItem, PlanItem } from '../types';
+import type { AuthUser, CatalogoItem, ClientePerfil, PlanItem } from '../types';
 import type {
   ClienteBusqueda,
+  Cupon,
   CompraEnCurso,
   PagoInfo,
   PasajeroForm,
@@ -122,7 +123,8 @@ function FlujoReserva({ compra, user }: { compra: CompraEnCurso; user: AuthUser 
 
   // Catálogos
   const [planes, setPlanes] = useState<PlanItem[]>([]);
-  const [ofertas, setOfertas] = useState<OfertaItem[]>([]);
+  // Ofertas disponibles del cliente de la reserva (vigentes y que no ha usado todavía).
+  const [ofertasCliente, setOfertasCliente] = useState<{ idCliente: number; lista: Cupon[] } | null>(null);
   const [tiposId, setTiposId] = useState<CatalogoItem[]>([]);
   const [metodosBackend, setMetodosBackend] = useState<string[]>([]);
 
@@ -149,17 +151,15 @@ function FlujoReserva({ compra, user }: { compra: CompraEnCurso; user: AuthUser 
     let vigente = true;
     const cargar = async () => {
       try {
-        const [rPlanes, rOfertas, rTipos, rMetodos] = await Promise.all([
+        const [rPlanes, rTipos, rMetodos] = await Promise.all([
           fetch(`${API_BASE}/planes`),
-          fetch(`${API_BASE}/ofertas?vigentes=true`),
           fetch(`${API_BASE}/catalogos/tipos-identificacion`),
           fetch(`${API_BASE}/catalogos/metodos-pago`),
         ]);
-        if (!rPlanes.ok || !rOfertas.ok || !rTipos.ok || !rMetodos.ok) {
+        if (!rPlanes.ok || !rTipos.ok || !rMetodos.ok) {
           throw new Error();
         }
         const dataPlanes: PlanItem[] = await rPlanes.json();
-        const dataOfertas: OfertaItem[] = await rOfertas.json();
         const dataTipos: CatalogoItem[] = await rTipos.json();
         const dataMetodos: CatalogoItem[] = await rMetodos.json();
         let perfil: ClientePerfil | null = null;
@@ -170,12 +170,8 @@ function FlujoReserva({ compra, user }: { compra: CompraEnCurso; user: AuthUser 
         if (!vigente) return;
         const planBasico = dataPlanes.length > 0 ? dataPlanes[0].idPlan : '';
         setPlanes(dataPlanes);
-        setOfertas(dataOfertas);
         setTiposId(dataTipos);
         setMetodosBackend(dataMetodos.map((m) => m.nombre));
-        // Por defecto la oferta vigente con mayor descuento.
-        const mejor = [...dataOfertas].sort((a, b) => b.porcentajeDescuento - a.porcentajeDescuento)[0];
-        setIdOferta(mejor ? mejor.idOferta : '');
         setPasajeros((prev) =>
           prev.map((p, i) => {
             if (i === 0 && perfil) return pasajeroDesde(perfil, planBasico);
@@ -195,6 +191,32 @@ function FlujoReserva({ compra, user }: { compra: CompraEnCurso; user: AuthUser 
     };
   }, [esEmpleado, user.idUsuario]);
 
+  // Cada vez que cambia el cliente de la reserva se cargan sus ofertas disponibles.
+  const idClienteReserva = cliente?.idUsuario ?? null;
+  useEffect(() => {
+    if (idClienteReserva === null) return;
+    let vigente = true;
+    const cargarOfertas = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/clientes/${idClienteReserva}/ofertas`);
+        const lista: Cupon[] = res.ok ? await res.json() : [];
+        if (!vigente) return;
+        setOfertasCliente({ idCliente: idClienteReserva, lista });
+        // Por defecto, la oferta disponible con mayor descuento.
+        const mejor = [...lista].sort((a, b) => b.porcentajeDescuento - a.porcentajeDescuento)[0];
+        setIdOferta(mejor ? mejor.idOferta : '');
+      } catch {
+        if (vigente) setOfertasCliente({ idCliente: idClienteReserva, lista: [] });
+      }
+    };
+    cargarOfertas();
+    return () => {
+      vigente = false;
+    };
+  }, [idClienteReserva]);
+  const ofertas = ofertasCliente !== null && ofertasCliente.idCliente === idClienteReserva ? ofertasCliente.lista : [];
+  const idOfertaValida = ofertas.some((o) => o.idOferta === idOferta) ? idOferta : '';
+
   const metodosDisponibles = useMemo(
     () =>
       (Object.keys(NOMBRE_METODO) as Metodo[]).filter(
@@ -207,7 +229,7 @@ function FlujoReserva({ compra, user }: { compra: CompraEnCurso; user: AuthUser 
   const tarifaViajes = viajes.reduce((suma, v) => suma + v.viaje.precioBase, 0);
   const planDe = (idPlan: number | '') => planes.find((p) => p.idPlan === idPlan);
   const subtotalEstimado = pasajeros.reduce((suma, p) => suma + tarifaViajes + (planDe(p.idPlan)?.precioExtra ?? 0), 0);
-  const ofertaElegida = ofertas.find((o) => o.idOferta === idOferta);
+  const ofertaElegida = ofertas.find((o) => o.idOferta === idOfertaValida);
   const descuentoEstimado = ofertaElegida ? Math.round(subtotalEstimado * ofertaElegida.porcentajeDescuento) / 100 : 0;
 
   // ---------- Paso 1: pasajeros ----------
@@ -276,7 +298,7 @@ function FlujoReserva({ compra, user }: { compra: CompraEnCurso; user: AuthUser 
     const payload: ReservaPayload = {
       idCliente: cliente.idUsuario,
       idEmpleado: esEmpleado ? user.idUsuario : null,
-      idOferta: idOferta === '' ? null : idOferta,
+      idOferta: idOfertaValida === '' ? null : idOfertaValida,
       viajes: viajes.map((v) => ({ idProgramacionViaje: v.viaje.idProgramacionViaje, tipoTrayecto: v.tipoTrayecto })),
       pasajeros: pasajeros.map((p) => ({
         tipoIdentificacion: p.tipoIdentificacion,
@@ -561,13 +583,18 @@ function FlujoReserva({ compra, user }: { compra: CompraEnCurso; user: AuthUser 
 
             <section className={styles.card}>
               <h3 className={styles.cardTitle}>Oferta</h3>
-              <p className={styles.cardSubtitle}>Se aplica el descuento de una oferta vigente.</p>
+              <p className={styles.cardSubtitle}>
+                {cliente
+                  ? 'Ofertas vigentes que este cliente todavía no ha usado. Cada oferta se puede usar una sola vez.'
+                  : 'Elige primero el cliente para ver sus ofertas disponibles.'}
+              </p>
               <select
                 className={styles.select}
-                value={idOferta}
+                value={idOfertaValida}
+                disabled={!cliente}
                 onChange={(e) => setIdOferta(e.target.value === '' ? '' : Number(e.target.value))}
               >
-                <option value="">Sin oferta</option>
+                <option value="">{cliente && ofertas.length === 0 ? 'No tiene ofertas disponibles' : 'Sin oferta'}</option>
                 {ofertas.map((o) => (
                   <option key={o.idOferta} value={o.idOferta}>
                     {o.titulo} · {o.porcentajeDescuento}% (hasta {formatearFecha(o.fechaFin)})
@@ -832,6 +859,7 @@ function FlujoReserva({ compra, user }: { compra: CompraEnCurso; user: AuthUser 
               <table className={styles.table}>
                 <thead>
                   <tr>
+                    <th>Trayecto</th>
                     <th>Pasajero</th>
                     <th>Identificación</th>
                     <th>Plan</th>
@@ -841,6 +869,7 @@ function FlujoReserva({ compra, user }: { compra: CompraEnCurso; user: AuthUser 
                 <tbody>
                   {reserva.pasajeros.map((p) => (
                     <tr key={p.idDetalle}>
+                      <td>{p.tipoTrayecto === 'VUELTA' ? 'Regreso' : 'Ida'}</td>
                       <td>{p.nombreCompleto}</td>
                       <td>{p.tipoIdentificacion} {p.numeroIdentificacion}</td>
                       <td>{p.nombrePlan}</td>

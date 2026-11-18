@@ -1,9 +1,9 @@
 import { useState, useEffect, type FormEvent, type ChangeEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import styles from './Profile.module.css';
 import iconVolverAtras from '../assets/iconVolverAtras.png';
 import { useAuth } from '../hooks/useAuth';
-import HistorialCliente from '../components/Perfil/HistorialCliente';
+import HistorialCliente, { type VistaHistorial } from '../components/Perfil/HistorialCliente';
 import type { ClientePerfil, EmpleadoPerfil } from '../types';
 
 const API_CLIENTES = 'http://localhost:8080/api/clientes';
@@ -108,6 +108,15 @@ const UBICACIONES: Record<string, Record<string, string[]>> = {
   },
 };
 
+type PestanaPerfil = 'perfil' | VistaHistorial;
+
+const PESTANAS: { id: PestanaPerfil; label: string }[] = [
+  { id: 'perfil', label: 'Mi perfil' },
+  { id: 'compras', label: 'Compras' },
+  { id: 'pagos', label: 'Pagos' },
+  { id: 'ofertas', label: 'Ofertas' },
+];
+
 export default function Profile() {
   const { user, updateUserSession } = useAuth();
   const navigate = useNavigate();
@@ -119,6 +128,15 @@ export default function Profile() {
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const esEmpleado = user?.tipoUsuario === 'EMPLEADO';
+
+  // Pestaña activa en la URL (?tab=compras) para poder enlazarla y conservarla al recargar.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabUrl = searchParams.get('tab');
+  const pestana: PestanaPerfil =
+    !esEmpleado && PESTANAS.some((p) => p.id === tabUrl) ? (tabUrl as PestanaPerfil) : 'perfil';
+  const cambiarPestana = (id: PestanaPerfil) => {
+    setSearchParams(id === 'perfil' ? {} : { tab: id }, { replace: true });
+  };
 
   useEffect(() => {
     if (!user) {
@@ -305,199 +323,220 @@ export default function Profile() {
       </div>
 
       <div className={styles.contentWrapper}>
-        <div className={styles.card}>
-          <h1 className={styles.title}>Mi Perfil</h1>
-          <p className={styles.subtitle}>
-            Consulta tu información personal y mantén tus datos de contacto y ubicación al día
-          </p>
+        {perfil && user && !esEmpleado && (
+          <nav className={styles.tabs} role="tablist" aria-label="Secciones de mi cuenta">
+            {PESTANAS.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                role="tab"
+                aria-selected={pestana === p.id}
+                className={`${styles.tab} ${pestana === p.id ? styles.tabActive : ''}`}
+                onClick={() => cambiarPestana(p.id)}
+              >
+                {p.label}
+              </button>
+            ))}
+          </nav>
+        )}
 
-          {feedback && (
-            <div
-              className={`${styles.alert} ${feedback.type === 'success' ? styles.alertSuccess : styles.alertError
-                }`}
-            >
-              {feedback.text}
-            </div>
-          )}
+        {pestana === 'perfil' && (
+          <div className={styles.card}>
+            <h1 className={styles.title}>Mi Perfil</h1>
+            <p className={styles.subtitle}>
+              Consulta tu información personal y mantén tus datos de contacto y ubicación al día
+            </p>
 
-          {perfil && (
-            <form onSubmit={handleSubmit} className={styles.form}>
-              <h2 className={styles.sectionTitle}>Datos personales (solo lectura)</h2>
-              <div className={styles.readOnlyGrid3}>
-                <div className={styles.infoBox}>
-                  <span className={styles.infoLabel}>Nombre completo</span>
-                  <span className={styles.infoValue}>
-                    {[perfil.primerNombre, perfil.segundoNombre, perfil.primerApellido, perfil.segundoApellido]
-                      .filter(Boolean)
-                      .join(' ')}
-                  </span>
-                </div>
-
-                <div className={styles.infoBox}>
-                  <span className={styles.infoLabel}>Identificación</span>
-                  <span className={styles.infoValue}>
-                    {perfil.tipoIdentificacion} {perfil.numeroIdentificacion}
-                  </span>
-                </div>
-
-                <div className={styles.infoBox}>
-                  <span className={styles.infoLabel}>Fecha de nacimiento</span>
-                  <span className={styles.infoValue}>{perfil.fechaNacimiento}</span>
-                </div>
+            {feedback && (
+              <div
+                className={`${styles.alert} ${feedback.type === 'success' ? styles.alertSuccess : styles.alertError
+                  }`}
+              >
+                {feedback.text}
               </div>
+            )}
 
-              {esEmpleado && datosLaborales && (
-                <>
-                  <h2 className={styles.sectionTitle} style={{ marginTop: '0.5rem' }}>
-                    Información laboral (solo lectura)
-                  </h2>
-                  <div className={styles.readOnlyGrid3}>
-                    <div className={styles.infoBox}>
-                      <span className={styles.infoLabel}>Cargo</span>
-                      <span className={styles.infoValue}>{datosLaborales.nombreCargo}</span>
-                    </div>
-
-                    <div className={styles.infoBox}>
-                      <span className={styles.infoLabel}>Sede</span>
-                      <span className={styles.infoValue}>{datosLaborales.nombreSede}</span>
-                    </div>
-
-                    <div className={styles.infoBox}>
-                      <span className={styles.infoLabel}>Fecha de contratación</span>
-                      <span className={styles.infoValue}>{datosLaborales.fechaContratacion}</span>
-                    </div>
+            {perfil && (
+              <form onSubmit={handleSubmit} className={styles.form}>
+                <h2 className={styles.sectionTitle}>Datos personales (solo lectura)</h2>
+                <div className={styles.readOnlyGrid3}>
+                  <div className={styles.infoBox}>
+                    <span className={styles.infoLabel}>Nombre completo</span>
+                    <span className={styles.infoValue}>
+                      {[perfil.primerNombre, perfil.segundoNombre, perfil.primerApellido, perfil.segundoApellido]
+                        .filter(Boolean)
+                        .join(' ')}
+                    </span>
                   </div>
-                </>
-              )}
 
-              <hr className={styles.divider} />
+                  <div className={styles.infoBox}>
+                    <span className={styles.infoLabel}>Identificación</span>
+                    <span className={styles.infoValue}>
+                      {perfil.tipoIdentificacion} {perfil.numeroIdentificacion}
+                    </span>
+                  </div>
 
-              <h2 className={styles.sectionTitle}>Contacto y ubicación editables</h2>
-
-              <div className={styles.inputGroup}>
-                <label htmlFor="correo">Correo electrónico *</label>
-                <input
-                  type="email"
-                  id="correo"
-                  name="correo"
-                  value={perfil.correo}
-                  onChange={handleChange}
-                  maxLength={100}
-                  required
-                />
-              </div>
-
-              <div className={styles.phoneRow}>
-                <div className={styles.inputGroup} style={{ maxWidth: '125px' }}>
-                  <label htmlFor="indicativo">Indicativo *</label>
-                  <select
-                    id="indicativo"
-                    name="indicativo"
-                    value={perfil.indicativo || '+57'}
-                    onChange={handleChange}
-                    required
-                  >
-                    <option value="+57">🇨🇴 +57</option>
-                    <option value="+1">🇺🇸 +1</option>
-                    <option value="+34">🇪🇸 +34</option>
-                    <option value="+52">🇲🇽 +52</option>
-                    <option value="+54">🇦🇷 +54</option>
-                    <option value="+56">🇨🇱 +56</option>
-                    <option value="+51">🇵🇪 +51</option>
-                    <option value="+593">🇪🇨 +593</option>
-                  </select>
+                  <div className={styles.infoBox}>
+                    <span className={styles.infoLabel}>Fecha de nacimiento</span>
+                    <span className={styles.infoValue}>{perfil.fechaNacimiento}</span>
+                  </div>
                 </div>
 
-                <div className={styles.inputGroup} style={{ flexGrow: 1 }}>
-                  <label htmlFor="telefono">Teléfono *</label>
+                {esEmpleado && datosLaborales && (
+                  <>
+                    <h2 className={styles.sectionTitle} style={{ marginTop: '0.5rem' }}>
+                      Información laboral (solo lectura)
+                    </h2>
+                    <div className={styles.readOnlyGrid3}>
+                      <div className={styles.infoBox}>
+                        <span className={styles.infoLabel}>Cargo</span>
+                        <span className={styles.infoValue}>{datosLaborales.nombreCargo}</span>
+                      </div>
+
+                      <div className={styles.infoBox}>
+                        <span className={styles.infoLabel}>Sede</span>
+                        <span className={styles.infoValue}>{datosLaborales.nombreSede}</span>
+                      </div>
+
+                      <div className={styles.infoBox}>
+                        <span className={styles.infoLabel}>Fecha de contratación</span>
+                        <span className={styles.infoValue}>{datosLaborales.fechaContratacion}</span>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                <hr className={styles.divider} />
+
+                <h2 className={styles.sectionTitle}>Contacto y ubicación editables</h2>
+
+                <div className={styles.inputGroup}>
+                  <label htmlFor="correo">Correo electrónico *</label>
                   <input
-                    type="text"
-                    id="telefono"
-                    name="telefono"
-                    placeholder="3001234567"
-                    value={perfil.telefono || ''}
+                    type="email"
+                    id="correo"
+                    name="correo"
+                    value={perfil.correo}
                     onChange={handleChange}
-                    pattern="^[0-9 -]{7,20}$"
-                    title="Entre 7 y 20 dígitos, espacios o guiones"
+                    maxLength={100}
                     required
                   />
                 </div>
-              </div>
 
-              <div className={styles.locationRow}>
-                <div className={styles.inputGroup}>
-                  <label htmlFor="pais">País *</label>
-                  <select
-                    id="pais"
-                    name="pais"
-                    value={perfil.pais}
-                    onChange={handleChange}
-                    required
-                  >
-                    {paisesDisponibles.map((pais) => (
-                      <option key={pais} value={pais}>
-                        {pais}
-                      </option>
-                    ))}
-                  </select>
+                <div className={styles.phoneRow}>
+                  <div className={styles.inputGroup} style={{ maxWidth: '125px' }}>
+                    <label htmlFor="indicativo">Indicativo *</label>
+                    <select
+                      id="indicativo"
+                      name="indicativo"
+                      value={perfil.indicativo || '+57'}
+                      onChange={handleChange}
+                      required
+                    >
+                      <option value="+57">🇨🇴 +57</option>
+                      <option value="+1">🇺🇸 +1</option>
+                      <option value="+34">🇪🇸 +34</option>
+                      <option value="+52">🇲🇽 +52</option>
+                      <option value="+54">🇦🇷 +54</option>
+                      <option value="+56">🇨🇱 +56</option>
+                      <option value="+51">🇵🇪 +51</option>
+                      <option value="+593">🇪🇨 +593</option>
+                    </select>
+                  </div>
+
+                  <div className={styles.inputGroup} style={{ flexGrow: 1 }}>
+                    <label htmlFor="telefono">Teléfono *</label>
+                    <input
+                      type="text"
+                      id="telefono"
+                      name="telefono"
+                      placeholder="3001234567"
+                      value={perfil.telefono || ''}
+                      onChange={handleChange}
+                      pattern="^[0-9 -]{7,20}$"
+                      title="Entre 7 y 20 dígitos, espacios o guiones"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className={styles.locationRow}>
+                  <div className={styles.inputGroup}>
+                    <label htmlFor="pais">País *</label>
+                    <select
+                      id="pais"
+                      name="pais"
+                      value={perfil.pais}
+                      onChange={handleChange}
+                      required
+                    >
+                      {paisesDisponibles.map((pais) => (
+                        <option key={pais} value={pais}>
+                          {pais}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className={styles.inputGroup}>
+                    <label htmlFor="departamento">Departamento *</label>
+                    <select
+                      id="departamento"
+                      name="departamento"
+                      value={perfil.departamento}
+                      onChange={handleChange}
+                      required
+                    >
+                      {departamentosDisponibles.map((depto) => (
+                        <option key={depto} value={depto}>
+                          {depto}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className={styles.inputGroup}>
+                    <label htmlFor="ciudad">Ciudad *</label>
+                    <select
+                      id="ciudad"
+                      name="ciudad"
+                      value={perfil.ciudad}
+                      onChange={handleChange}
+                      required
+                    >
+                      {ciudadesDisponibles.map((ciudad) => (
+                        <option key={ciudad} value={ciudad}>
+                          {ciudad}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
                 <div className={styles.inputGroup}>
-                  <label htmlFor="departamento">Departamento *</label>
-                  <select
-                    id="departamento"
-                    name="departamento"
-                    value={perfil.departamento}
+                  <label htmlFor="direccion">Dirección de residencia *</label>
+                  <input
+                    type="text"
+                    id="direccion"
+                    name="direccion"
+                    value={perfil.direccion}
                     onChange={handleChange}
+                    maxLength={50}
                     required
-                  >
-                    {departamentosDisponibles.map((depto) => (
-                      <option key={depto} value={depto}>
-                        {depto}
-                      </option>
-                    ))}
-                  </select>
+                  />
                 </div>
 
-                <div className={styles.inputGroup}>
-                  <label htmlFor="ciudad">Ciudad *</label>
-                  <select
-                    id="ciudad"
-                    name="ciudad"
-                    value={perfil.ciudad}
-                    onChange={handleChange}
-                    required
-                  >
-                    {ciudadesDisponibles.map((ciudad) => (
-                      <option key={ciudad} value={ciudad}>
-                        {ciudad}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
+                <button type="submit" className={styles.submitButton} disabled={saving}>
+                  {saving ? 'Guardando cambios...' : 'Guardar cambios'}
+                </button>
+              </form>
+            )}
+          </div>
+        )}
 
-              <div className={styles.inputGroup}>
-                <label htmlFor="direccion">Dirección de residencia *</label>
-                <input
-                  type="text"
-                  id="direccion"
-                  name="direccion"
-                  value={perfil.direccion}
-                  onChange={handleChange}
-                  maxLength={50}
-                  required
-                />
-              </div>
-
-              <button type="submit" className={styles.submitButton} disabled={saving}>
-                {saving ? 'Guardando cambios...' : 'Guardar cambios'}
-              </button>
-            </form>
-          )}
-        </div>
-
-        {perfil && user && !esEmpleado && <HistorialCliente idCliente={user.idUsuario} />}
+        {perfil && user && !esEmpleado && pestana !== 'perfil' && (
+          <HistorialCliente idCliente={user.idUsuario} vista={pestana} />
+        )}
       </div>
     </div>
   );

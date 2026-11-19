@@ -157,28 +157,21 @@ export default function HistorialCliente({ idCliente, vista }: { idCliente: numb
                     <span className={`${styles.badge} ${CLASE_ESTADO[c.estadoReserva] ?? ''}`}>{c.estadoReserva}</span>
                   </header>
                   <ul className={styles.trips}>
-                    {c.viajes.map((v) => {
-                      const enEsteViaje = c.pasajeros.filter(
-                        (p) => p.idProgramacionViaje === v.idProgramacionViaje
-                      );
-                      return (
-                        <li key={v.idProgramacionViaje}>
-                          <div>
-                            <span className={styles.tripType}>{v.tipoTrayecto === 'IDA' ? 'Ida' : 'Regreso'}</span>
-                            {v.ciudadOrigen} → {v.ciudadDestino} · {formatearFecha(v.fechaHoraSalida)},{' '}
-                            {formatearHora(v.fechaHoraSalida)}–{formatearHora(v.fechaHoraLlegada)}
-                          </div>
-                          <div className={styles.passengers}>
-                            {enEsteViaje.map((p) => (
-                              <span key={p.idDetalle} className={styles.chip}>
-                                {p.nombreCompleto} · asiento {p.numeroAsiento} · {p.nombrePlan}
-                              </span>
-                            ))}
-                          </div>
-                        </li>
-                      );
-                    })}
+                    {c.viajes.map((v) => (
+                      <li key={v.idProgramacionViaje}>
+                        <span className={styles.tripType}>{v.tipoTrayecto === 'IDA' ? 'Ida' : 'Regreso'}</span>
+                        {v.ciudadOrigen} → {v.ciudadDestino} · {formatearFecha(v.fechaHoraSalida)},{' '}
+                        {formatearHora(v.fechaHoraSalida)}–{formatearHora(v.fechaHoraLlegada)}
+                      </li>
+                    ))}
                   </ul>
+                  <div className={styles.passengers}>
+                    {c.pasajeros.map((p) => (
+                      <span key={p.idDetalle} className={styles.chip}>
+                        {p.nombreCompleto} · asiento {p.numeroAsiento} · {p.nombrePlan}
+                      </span>
+                    ))}
+                  </div>
                   <footer className={styles.itemFooter}>
                     <span className={styles.muted}>
                       {c.tituloOferta ? `Oferta ${c.tituloOferta} (−${formatearPrecio(c.descuento)})` : 'Sin oferta'}

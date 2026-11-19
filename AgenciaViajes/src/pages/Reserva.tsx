@@ -859,7 +859,6 @@ function FlujoReserva({ compra, user }: { compra: CompraEnCurso; user: AuthUser 
               <table className={styles.table}>
                 <thead>
                   <tr>
-                    <th>Trayecto</th>
                     <th>Pasajero</th>
                     <th>Identificación</th>
                     <th>Plan</th>
@@ -869,7 +868,6 @@ function FlujoReserva({ compra, user }: { compra: CompraEnCurso; user: AuthUser 
                 <tbody>
                   {reserva.pasajeros.map((p) => (
                     <tr key={p.idDetalle}>
-                      <td>{p.tipoTrayecto === 'VUELTA' ? 'Regreso' : 'Ida'}</td>
                       <td>{p.nombreCompleto}</td>
                       <td>{p.tipoIdentificacion} {p.numeroIdentificacion}</td>
                       <td>{p.nombrePlan}</td>

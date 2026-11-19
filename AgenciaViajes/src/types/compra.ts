@@ -113,11 +113,9 @@ export interface ReservaCreada {
     fechaHoraLlegada: string;
     precioBase: number;
   }[];
-  /** Un registro por pasajero y por viaje (ida y regreso = dos registros por pasajero). */
+  /** Un registro por pasajero (DetalleReserva); viaja en todos los viajes con el mismo asiento. */
   pasajeros: {
     idDetalle: number;
-    idProgramacionViaje: number;
-    tipoTrayecto: string;
     tipoIdentificacion: string;
     numeroIdentificacion: string;
     nombreCompleto: string;

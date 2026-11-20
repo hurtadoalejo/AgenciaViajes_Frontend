@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styles from './HistorialCliente.module.css';
+import CambiarFechaViaje from './CambiarFechaViaje';
 import type { Cupon, ReservaCreada } from '../../types/compra';
 import { API_BASE, formatearFecha, formatearHora, formatearPrecio, leerError } from '../../utils/compra';
 
@@ -41,14 +42,18 @@ function fechaHora(texto: string | null): string {
   return `${formatearFecha(texto)}, ${formatearHora(texto)}`;
 }
 
-/** Días calendario que faltan desde hoy hasta el día de la primera salida de la reserva. */
-function diasParaElViaje(compra: ReservaCreada): number | null {
-  if (compra.viajes.length === 0) return null;
-  const primera = compra.viajes.map((v) => v.fechaHoraSalida).sort()[0];
-  const [a, m, d] = primera.slice(0, 10).split('-').map(Number);
+/** Días calendario que faltan desde hoy hasta el día de una salida ("2026-12-20T07:00:00"). */
+function diasHasta(fechaHoraSalida: string): number {
+  const [a, m, d] = fechaHoraSalida.slice(0, 10).split('-').map(Number);
   const hoy = new Date();
   const inicioHoy = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
   return Math.round((new Date(a, m - 1, d).getTime() - inicioHoy.getTime()) / 86_400_000);
+}
+
+/** Días que faltan para la primera salida de la reserva. */
+function diasParaElViaje(compra: ReservaCreada): number | null {
+  if (compra.viajes.length === 0) return null;
+  return diasHasta(compra.viajes.map((v) => v.fechaHoraSalida).sort()[0]);
 }
 
 /** Historial del cliente en su perfil: compras, pagos y ofertas que todavía puede usar. */
@@ -58,6 +63,8 @@ export default function HistorialCliente({ idCliente, vista }: { idCliente: numb
   const [error, setError] = useState<string | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
   const [cancelando, setCancelando] = useState<number | null>(null);
+  // Viaje con el panel "Cambiar fecha" abierto: "idReserva-idProgramacionViaje".
+  const [cambiando, setCambiando] = useState<string | null>(null);
   const [recarga, setRecarga] = useState(0);
 
   useEffect(() => {
@@ -157,13 +164,46 @@ export default function HistorialCliente({ idCliente, vista }: { idCliente: numb
                     <span className={`${styles.badge} ${CLASE_ESTADO[c.estadoReserva] ?? ''}`}>{c.estadoReserva}</span>
                   </header>
                   <ul className={styles.trips}>
-                    {c.viajes.map((v) => (
-                      <li key={v.idProgramacionViaje}>
-                        <span className={styles.tripType}>{v.tipoTrayecto === 'IDA' ? 'Ida' : 'Regreso'}</span>
-                        {v.ciudadOrigen} → {v.ciudadDestino} · {formatearFecha(v.fechaHoraSalida)},{' '}
-                        {formatearHora(v.fechaHoraSalida)}–{formatearHora(v.fechaHoraLlegada)}
-                      </li>
-                    ))}
+                    {c.viajes.map((v) => {
+                      const clave = `${c.idReserva}-${v.idProgramacionViaje}`;
+                      const puedeCambiar = activa && diasHasta(v.fechaHoraSalida) >= DIAS_MINIMOS_CANCELACION;
+                      return (
+                        <li key={v.idProgramacionViaje}>
+                          <div className={styles.tripRow}>
+                            <span>
+                              <span className={styles.tripType}>{v.tipoTrayecto === 'IDA' ? 'Ida' : 'Regreso'}</span>
+                              {v.ciudadOrigen} → {v.ciudadDestino} · {formatearFecha(v.fechaHoraSalida)},{' '}
+                              {formatearHora(v.fechaHoraSalida)}–{formatearHora(v.fechaHoraLlegada)}
+                            </span>
+                            {puedeCambiar && cambiando !== clave && (
+                              <button
+                                type="button"
+                                className={styles.linkButton}
+                                onClick={() => {
+                                  setAviso(null);
+                                  setCambiando(clave);
+                                }}
+                              >
+                                Cambiar fecha
+                              </button>
+                            )}
+                          </div>
+                          {cambiando === clave && (
+                            <CambiarFechaViaje
+                              idCliente={idCliente}
+                              idReserva={c.idReserva}
+                              viaje={v}
+                              onCerrar={() => setCambiando(null)}
+                              onCambiada={(mensaje) => {
+                                setCambiando(null);
+                                setAviso(mensaje);
+                                setRecarga((n) => n + 1);
+                              }}
+                            />
+                          )}
+                        </li>
+                      );
+                    })}
                   </ul>
                   <div className={styles.passengers}>
                     {c.pasajeros.map((p) => (
@@ -183,7 +223,7 @@ export default function HistorialCliente({ idCliente, vista }: { idCliente: numb
                       <span className={styles.muted}>
                         {c.estadoReserva === 'PENDIENTE' ? 'Esta reserva no se ha pagado. ' : ''}
                         {puedeCancelar
-                          ? `Puedes cancelarla hasta ${DIAS_MINIMOS_CANCELACION} días antes del viaje.`
+                          ? `Puedes cancelarla o cambiar la fecha de un viaje hasta ${DIAS_MINIMOS_CANCELACION} días antes de su salida.`
                           : dias !== null && dias >= 0
                             ? `Ya no se puede cancelar: faltan ${dias} ${dias === 1 ? 'día' : 'días'} para el viaje (mínimo ${DIAS_MINIMOS_CANCELACION}).`
                             : 'El viaje ya se realizó.'}

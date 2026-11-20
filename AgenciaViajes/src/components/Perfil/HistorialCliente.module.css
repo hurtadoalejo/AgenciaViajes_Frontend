@@ -178,6 +178,120 @@
   cursor: default;
 }
 
+/* ---------- Cambiar fecha de un viaje ---------- */
+.tripRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.linkButton {
+  padding: 0.25rem 0.6rem;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.linkButton:hover {
+  background-color: #dbeafe;
+}
+
+.cambioPanel {
+  margin: 0.55rem 0 0.35rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  background-color: #f8fbff;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.cambioHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.cambioLabel {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.dateInput {
+  max-width: 220px;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #0f172a;
+  background-color: #ffffff;
+}
+
+.cambioOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.cambioOption {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background-color: #ffffff;
+  cursor: pointer;
+  font-size: 0.88rem;
+}
+
+.cambioOptionActive {
+  border-color: #2563eb;
+  background-color: #eff6ff;
+}
+
+.cambioActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.primaryButton {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 8px;
+  background-color: #0f172a;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.primaryButton:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.secondaryButton {
+  padding: 0.5rem 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: #334155;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
 /* ---------- Pagos ---------- */
 .tableWrap {
   overflow-x: auto;
